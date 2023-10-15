@@ -1,0 +1,6 @@
+description
+i want to use nextauth,prisma and next.js to make this project work
+i should first try to work with next auth to realize how it work
+1.navbar
+2. auth {prisma+nextauth}
+ 
