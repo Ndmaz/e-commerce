@@ -65,7 +65,8 @@ const navbaritems=[{key:1,name:"خانه",direction:"/"}
 
 
 </div>
-  </header>)
+  </header>
+  )
 }
 
 export default Header

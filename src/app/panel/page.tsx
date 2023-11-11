@@ -4,7 +4,7 @@ import { Card, CardTitle } from "@/components/ui/card";
 
 export default function panel(){
 
-    return <div className="mt-[5rem]">
+    return <div>
         <Card className="">
 <CardTitle>
     پنل کاربری
@@ -20,7 +20,9 @@ panel
 <div>تغییر اطلاعات پروفایل، </div>
 
 admin access
-
+<div>
+    حذف و اضافه محصول
+</div>
 <div>،سفارشات، 
  </div>
 <div>مدیریت محصولات  

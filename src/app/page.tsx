@@ -5,11 +5,11 @@ import authOptions from '@/lib/auth'
 
 export default async function Home() {
   const session=await getServerSession(authOptions)
-  return (
-    <main className=' mt-[5rem]'>
+  return ( <div>
+  
       {JSON.stringify(session)}
      <Carousel/>
      
-  </main>
+  </div>
   )
 }

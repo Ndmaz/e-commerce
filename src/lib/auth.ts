@@ -10,6 +10,7 @@ const authOptions : NextAuthOptions ={
     },
     pages:{
       signIn:'/sign-in'
+    
     },
   providers:[
    CredentialsProvider({
@@ -47,7 +48,8 @@ const authOptions : NextAuthOptions ={
       id: user.id +'',
       email:user.email,
       name:user.name,
-      randomKey:'hey cool'
+      role:user.role,
+    
     }
     }
    })
@@ -55,12 +57,15 @@ const authOptions : NextAuthOptions ={
   callbacks:{
     session:({session,token})=>{
       console.log('session callback',{session,token})
+   
       return{
         ...session,
         user:{
           ...session.user,
-          id:token.id,
-          randomKey:token.randomKey
+         id:token.id,
+         role:token.role
+          
+        
         }
       }
       return session
@@ -68,11 +73,13 @@ const authOptions : NextAuthOptions ={
     jwt:({token,user})=>{
       console.log("jwt callback",{token,user})
       if(user){
-        const u =user as unknown as any
+       
         return{
           ...token,
-          id:u.id,
-          randomKey:u.randomKey
+       id:user.id,
+       role:token.role
+       
+          
         }
       }
 

@@ -16,7 +16,7 @@ model User {
   email    String    @unique
   password String
   role     String    @default("USER")
-
+ 
 
   review  Review[]
 
@@ -24,12 +24,15 @@ model User {
 
 model Product {
   id          Int       @id @default(autoincrement())
-  name        String
+  productname        String
+productcode        String
+  synopsis    String
   description String
+  details    String
   price       Float
-  image       String
-  category    Category? @relation(fields: [categoryId], references: [id])
-  categoryId  Int?
+  img       String
+  category    Category? @relation(fields: [categoryname], references: [name])
+  categoryname  String
   reviews     Review[]
 }
 
@@ -48,7 +51,17 @@ model Review {
   user      User     @relation(fields: [userId], references: [id])
   userId    Int
 }
+ model Order {
+  id Int @id @default(autoincrement())
 
+  address String
+  postalcode String
+  phonenumber String
+   products String
+   price String
+   paymentcallback Boolean
+   status String
+ }
 
 
 

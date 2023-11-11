@@ -1,7 +1,11 @@
 
 
 export default function Products(){
-    return<div className="mt-[5rem]">
+    const productdata=async () => {
+        
+    
+    }
+    return<div >
         products
         <div>
             

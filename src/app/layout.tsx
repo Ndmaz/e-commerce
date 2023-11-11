@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Header from '@/components/Header'
 import { cn } from '@/lib/utils'
+import StickyFooter from '@/components/stickyFooter'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
@@ -18,11 +19,15 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className=' w-full h-full'>
-      <body className={cn(inter.className,'') }>
+    <html lang="en" className=' w-full h-[100vh]'>
+      <body className={cn(inter.className) }>
         <Header/>
-        {children}
+       <main className='my-[5rem] overflow-y-auto  sticky md:static top[5rem] md:h-full h-200vh '>
+ {children}
+       </main>
        
+        
+       <StickyFooter/>
         </body>
     </html>
   )
