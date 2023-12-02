@@ -11,7 +11,7 @@ import { LogOutButton, LoginButton } from "./SignAuth"
 const navbaritems=[{key:1,name:"خانه",direction:"/"}
 ,{key:2,name:"محصولات",direction:"/products"}
 ,{key:3,name:"درباره ما",direction:"/"}
-,{key:4,name:"تماس باما",direction:"/"},]
+,{key:4,name:"پنل کاربری",direction:"/panel"},]
  const [nav,usenav]= useState( true)
 
   return(

@@ -24,15 +24,15 @@ model User {
 
 model Product {
   id          Int       @id @default(autoincrement())
-  productname        String
-productcode        String
+  productname        String @unique
+productcode       String?
   synopsis    String
-  description String
-  details    String
-  price       Float
+  description String?
+  details    String?
+  price       Float?
   img       String
   category    Category? @relation(fields: [categoryname], references: [name])
-  categoryname  String
+  categoryname  String?
   reviews     Review[]
 }
 

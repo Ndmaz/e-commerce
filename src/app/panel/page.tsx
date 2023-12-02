@@ -1,6 +1,6 @@
 import { Card, CardTitle } from "@/components/ui/card";
 
-
+import Link from "next/link";
 
 export default function panel(){
 
@@ -26,7 +26,8 @@ admin access
 <div>،سفارشات، 
  </div>
 <div>مدیریت محصولات  
-</div>    
+</div>   
+<Link href='/panel/ProductManagment'>Productmanagement</Link> 
 </Card>
  </div>
 }

@@ -1,29 +1,40 @@
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { json } from "node:stream/consumers";
+import { stringify } from "querystring";
+import prisma from "@/lib/database";
 
 
- const prisma=new PrismaClient
- async function handler(req:Request, res:Response){
+export  async function POST(req:Request,res:Response){
+
+
+
 try {
     
 
-    if(req.method==='POST'){
-   const {data} = await req.json()
-      
-       const product = prisma.product.create({
+    
+   const {productname
+    ,category
+    ,price
+    ,img
+    ,synopsis} = await req.json()
+  
+       const product = await prisma.product.create({
         data:{
-         ...data,
-       categoryname: data.category,
-       price: parseFloat(data.price),
-       description:data.discripstion, 
+          productname
+         
+          ,price:parseFloat(price)
+          ,img
+          ,synopsis
         }
      })
 
-   NextResponse.json(product)
+console.log(product)
+  return Response.json(product)
     }
 
-   } catch (error) {
+   catch (error) {
      console.error(error)
+     return NextResponse.json(JSON.stringify(error))
    } 
 }
-export {handler as GET,handler as POST}

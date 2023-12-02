@@ -4,45 +4,59 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useState}  from "react";
+
 import Link from "next/link";
 import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
 
 
 export default function Productmanagement(){
 
-   const [productname,setProductname]=useState('')
-   const [productcode,setProductcode]=useState('')
+
+  const [productname,setProductname]=useState('')
+  // const [productcode,setProductcode]=useState('')
    const [category,setcategory]=useState('')
    const [price,setprice]=useState('')
    const [img,setimg]=useState('')
    const [synopsis,setSynopsis]=useState('')
-   const [discripstion,setDiscription]=useState('')
-   const [details,setditals]=useState('')
+  // const [discripstion,setDiscription]=useState('')
+ // const [details,setditals]=useState('')
+const [returnvalue,setreturnvalue]=useState<Boolean>()
+const [datasback,setdatasback]=useState({data:{}})
 
    const handlesubmit= async(event: React.FormEvent<HTMLFormElement>)=>{
     event.preventDefault()
-const data={  productname
-  ,productcode
+/*const data={  productname
   ,category
   ,price
   ,img
   ,synopsis
-  ,discripstion
-  ,details}
+
+ }*/ 
     try {
       const res= await fetch('/api/product',{
         method: 'POST'
          ,headers:{  'Content-Type':'application/json'}
-        ,body:JSON.stringify(data)
+        ,body:JSON.stringify({
+          productname
+  ,category
+  ,price
+  ,img
+  ,synopsis
+        })
        
 
       })
+      const datas= await res.json
+     
       if (res.ok) {
-        alert('Product created successfully!'+res.body);
-        alert
+        alert('Product created successfully!');
+        setreturnvalue(true)
+        setdatasback({data:{...datas}}) 
+        
       } else {
-        alert('Failed to create product!');
+        alert('Failed to create product!'+datas);
+        
       }
 
     } catch (error) {
@@ -50,6 +64,8 @@ const data={  productname
     }
 
    }
+
+   // returned datas of the products, how can i 
     return (
     <div className="flex flex-col grow  bg-white md:w-[60vw] md:max-w-xl md:mx-auto pt-6 px-8 md:pt-3  md:mt-6  md:rounded-xl md:shadow-lg">
 
@@ -60,33 +76,25 @@ const data={  productname
     </div>
     
      <form  onSubmit={handlesubmit} className="p-4 space-y-4 text-right">
- 
-       
-  
+ {returnvalue?`'datasent' ${datasback}`:'not sent' }
+   
+
+
          <div className="space-y-4">
          <Label className="" htmlFor="name">نام محصول </Label>
-           <Input id="name" type="text" value={productname} onChange={(e)=>setProductname(e.target.value)}/>
-           <br />
-           <Label className="mt-2" htmlFor="code">کد محصول</Label>
-           <Input id="code" type="text" value={productcode} onChange={(e)=>setProductcode(e.target.value)}  />
+           <Input name="name" type="text"  value={productname} onChange={(e)=>setProductname(e.target.value)} />
            <br />
            <Label className="" htmlFor="category">نوع محصول</Label>
-           <Input id="category" type="text" value={category} onChange={(e)=>setcategory(e.target.value)}  />
+           <Input name="category" type="text"  value={category} onChange={(e)=>setcategory(e.target.value)} />
            <br />
            <Label className="" htmlFor="price">قیمت</Label>
-           <Input id="price" type="text" value={price} onChange={(e)=>setprice(e.target.value)}  />
+           <Input name="price" type="text"  value={price} onChange={(e)=>setprice(e.target.value)} />
            <br />
            <Label className="ml-auto" htmlFor="image">عکس محصول</Label>
-           <Input id="image"  type="text" value={img} onChange={(e)=>setimg(e.target.value)} />
+           <Input name="image"  type="text"  value={img} onChange={(e)=>setimg(e.target.value)}/>
            <br />
            <Label className="" htmlFor="synopsis">توضیح کوتاه</Label>
-           <Textarea id="synopsis" value={synopsis} onChange={(e)=>setSynopsis(e.target.value)}/>
-           <br />
-           <Label className="" htmlFor="discription">بررسی محصول</Label>
-           <Textarea id="discription" value={discripstion} onChange={(e)=>setDiscription(e.target.value)}/>
-           <br />
-           <Label className="" htmlFor="details">مشخصات محصول</Label>
-           <Textarea id="details" value={details} onChange={(e)=>setditals(e.target.value)}/>
+           <Textarea name="synopsis"  value={synopsis} onChange={(e)=>setSynopsis(e.target.value)}  />
            
            </div>
            <Button  type="submit" className="w-full">ثبت محصول</Button>
@@ -98,4 +106,14 @@ const data={  productname
      </div>
      </div>
  )
-}
+} 
+
+/*   value={productname} onChange={(e)=>setProductname(e.target.value)}
+   value={productcode} onChange={(e)=>setProductcode(e.target.value)}
+value={category} onChange={(e)=>setcategory(e.target.value)}
+value={price} onChange={(e)=>setprice(e.target.value)}
+ value={img} onChange={(e)=>setimg(e.target.value)}
+ value={synopsis} onChange={(e)=>setSynopsis(e.target.value)}
+ value={discripstion} onChange={(e)=>setDiscription(e.target.value)}
+value={details} onChange={(e)=>setditals(e.target.value)}
+ */
