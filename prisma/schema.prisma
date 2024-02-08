@@ -15,13 +15,16 @@ model User {
   name     String?
   email    String    @unique
   password String
-  role     String    @default("USER")
+  role     role   @default(USER)
  
 
   review  Review[]
 
 }
-
+enum role {
+  USER
+  ADMIN
+}
 model Product {
   id          Int       @id @default(autoincrement())
   productname        String @unique
@@ -31,8 +34,8 @@ productcode       String?
   details    String?
   price       Float?
   img       String
-  category    Category? @relation(fields: [categoryname], references: [name])
-  categoryname  String?
+  category    Category[]
+  
   reviews     Review[]
 }
 

@@ -1,11 +1,16 @@
-import { useState } from 'react'
-import { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient()
 
 export default function Cart(){
 
-    return <div>
-        ggg
+return( 
+<div>
+      handling seleted products
     </div>
+    )
+     
+  
 }
+//selected products
+//validation
+//is there address info?
+//

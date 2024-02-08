@@ -68,7 +68,7 @@ const authOptions : NextAuthOptions ={
         
         }
       }
-      return session
+      
     },
     jwt:({token,user})=>{
       console.log("jwt callback",{token,user})
@@ -77,7 +77,7 @@ const authOptions : NextAuthOptions ={
         return{
           ...token,
        id:user.id,
-       role:token.role
+       role:user.role
        
           
         }

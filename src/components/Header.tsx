@@ -8,11 +8,6 @@ import authOptions from "@/lib/auth"
 import { LogOutButton, LoginButton } from "./SignAuth"
 
  function Header (){
-const navbaritems=[{key:1,name:"خانه",direction:"/"}
-,{key:2,name:"محصولات",direction:"/products"}
-,{key:3,name:"درباره ما",direction:"/"}
-,{key:4,name:"پنل کاربری",direction:"/panel"},]
- const [nav,usenav]= useState( true)
 
   return(
   <header className="fixed w-full h-[5rem] top-0 flex justify-between bg-slate-300">
@@ -33,38 +28,25 @@ const navbaritems=[{key:1,name:"خانه",direction:"/"}
 </div>
 
 {/*navbar */}
-<div className="hidden md:flex md:flex-row-reverse md:space-x-4 ">
-     {navbaritems.map((navbar)=>{
-      return(
-        <Link key={navbar.key} href={navbar.direction} className="m-3 p-1 text-sm md:font-bold hover:bg-slate-200 hover:rounded-md">
-        {navbar.name}
-        </Link>
-      )
-     })}
+<div className="hidden md:flex md:flex-row-reverse md:space-x-4 mr-8">
    
+   <Link  href='/' className="m-3 p-1 text-sm md:font-bold hover:bg-slate-200 hover:rounded-md">
+        خانه
+        </Link>
+        <Link  href='/products' className="m-3 p-1 text-sm md:font-bold hover:bg-slate-200 hover:rounded-md">
+        محصولات
+        </Link>
+        <Link  href='/' className="m-3 p-1 text-sm md:font-bold hover:bg-slate-200 hover:rounded-md">
+       درباره ما
+        </Link>
+        <Link  href='/panel' className="m-3 p-1 text-sm md:font-bold hover:bg-slate-200 hover:rounded-md">
+        پنل کاربری
+        </Link>
 </div>
 
 {/* logo*/}
 
-<div className="">
-  <div className= {` ${nav?'hidden':'flex'} md:hidden flex-col h-full fixed right-0 top-0 bg-slate-400   `}>
-  <svg onClick={()=>usenav(!nav)} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-arrow-down-right"><path d="m7 7 10 10"/><path d="M17 7v10H7"/></svg>
-{navbaritems.map((navbar)=>{
-      return(
-        <Link key={navbar.key} href={navbar.direction} className="m-3 p-1 text-sm font-bold hover:bg-slate-200 hover:rounded-md">
-        {navbar.name}
-      
-        </Link>
-      )
-     })}
-     <LoginButton />
-     <LogOutButton/>
-   
-</div >
-<svg onClick={()=>usenav(!nav)} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className= {`${nav?'':'hidden'}md:hidden mt-4 mr-3 w-6 h-6 border-box`}><line x1="3" x2="21" y1="6" y2="6"/><line x1="3" x2="21" y1="12" y2="12"/><line x1="3" x2="21" y1="18" y2="18"/></svg>
 
-
-</div>
   </header>
   )
 }

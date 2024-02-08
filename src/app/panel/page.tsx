@@ -1,9 +1,10 @@
 import { Card, CardTitle } from "@/components/ui/card";
+import { useSession } from "next-auth/react";
 
 import Link from "next/link";
 
 export default function panel(){
-
+const{role}=useSession
     return <div>
         <Card className="">
 <CardTitle>

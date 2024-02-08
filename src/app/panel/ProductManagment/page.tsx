@@ -91,7 +91,7 @@ const [datasback,setdatasback]=useState({data:{}})
            <Input name="price" type="text"  value={price} onChange={(e)=>setprice(e.target.value)} />
            <br />
            <Label className="ml-auto" htmlFor="image">عکس محصول</Label>
-           <Input name="image"  type="text"  value={img} onChange={(e)=>setimg(e.target.value)}/>
+           <Input name="image"  type="file"  value={img} onChange={(e)=>setimg(e.target.value)}/>
            <br />
            <Label className="" htmlFor="synopsis">توضیح کوتاه</Label>
            <Textarea name="synopsis"  value={synopsis} onChange={(e)=>setSynopsis(e.target.value)}  />

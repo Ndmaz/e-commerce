@@ -3,22 +3,23 @@ import pic from '@/app/1.jpg'
 
 export default function Productcard({productname,price,productid}){
 
-    return <div  className="w-[20rem] mt-4 ml-7">
-<div className="">
+    return <div  className="flex flex-row-reverse md:block w-[20rem] mt-4 ml-7 p-1 border-[0.01rem] border-y-gray-700">
+    <div className="w-[12rem] pl-[3px] border-[0.01rem] border-l-green-600 ">
 <Image
         src={pic}
-        width={600}
-        height={500}
+        width={300}
+        height={300}
         alt="dd"
         className=""
         />
 </div>
-{productid}
-        <div className="  ">
+<div className="  ">
+     <p className="text-right ">{productname}</p>
+            {productid}
              <p>{price}</p>
-             <p className="text-right">{productname}</p>
+            
              </div>
        
 
     </div>
-}
+}3

@@ -4,7 +4,8 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Header from '@/components/Header'
 import { cn } from '@/lib/utils'
-import StickyFooter from '@/components/stickyFooter'
+import StickyFooter from '@/components/StickyFooter'
+import Providers from '@/components/Providers'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
@@ -21,6 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en" className=' w-full h-[100vh]'>
       <body className={cn(inter.className) }>
+        <Providers>
         <Header/>
        <main className='my-[5rem] overflow-y-auto  sticky md:static top[5rem] md:h-full h-200vh '>
  {children}
@@ -28,6 +30,7 @@ export default function RootLayout({
        
         
        <StickyFooter/>
+       </Providers>
         </body>
     </html>
   )
