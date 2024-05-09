@@ -34,8 +34,8 @@ productcode       String?
   details    String?
   price       Float?
   img       String
-  category    Category[]
-  
+  category    Category @relation(fields: [categoryid],references: [id])
+  categoryid Int
   reviews     Review[]
 }
 

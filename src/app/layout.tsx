@@ -19,13 +19,17 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+
+  
   return (
-    <html lang="en" className=' w-full h-[100vh]'>
-      <body className={cn(inter.className) }>
+    <html lang="" dir='' >
+      <body className='font-serif'>
         <Providers>
-        <Header/>
-       <main className='my-[5rem] overflow-y-auto  sticky md:static top[5rem] md:h-full h-200vh '>
- {children}
+        <Header />
+       <main className=' my-[5rem]     sticky md:static top-[5rem] md:h-[100vh] h-[100vh] '>
+
+  {children}
+ 
        </main>
        
         

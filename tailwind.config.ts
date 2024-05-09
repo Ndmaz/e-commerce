@@ -6,6 +6,7 @@ module.exports = {
     './components/**/*.{ts,tsx}',
   
 	],
+  mode:'jit',
   theme: {
     container: {
       center: true,

@@ -6,7 +6,13 @@ export async function GET(){
     try {
 
 
-         const products= await prisma.product.findMany()
+         const products= await prisma.product.findMany(
+            {
+                include:{
+                    category:true,
+                }
+            }
+         )
          console.log(products)
          return NextResponse.json({products})  
     } catch (error) {

@@ -1,7 +1,7 @@
 'use client'
 
 import Productcard from "@/components/Productcard"
-import { useEffect, useState } from "react"
+
 import { useQuery } from "react-query"
 
 export default function ProductList(){
@@ -24,37 +24,7 @@ export default function ProductList(){
 
     
   })
-    /*const [productss,setproducts]=useState([])
-    useEffect( () => {
-        
-        async function productfetch () {
-            try {
-                //getting products
-                  const res = await fetch('http://localhost:3000/api/gettingproducts')
-            if(res.ok){
-               
-                 const data= await res.json()
-                 const producti=data.products
-                 console.log(producti)
-                   console.log(productss)
-               setproducts(producti)
-            
-            }
-          
-            } catch (error) {
-                     alert(error)
-        return{error:error}
-        
-            }
-        
-          
-         
-           
-        }
-        productfetch()
-    
-    },[])*/
-
+  
 
     return(
 

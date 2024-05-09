@@ -14,27 +14,32 @@ try {
 
     
    const {productname
-    ,category
+    
     ,price
     ,img
-    ,synopsis} = await req.json()
+    ,synopsis,
+    category} = await req.json()
   
        const product = await prisma.product.create({
         data:{
           productname
-         
           ,price:parseFloat(price)
           ,img
-          ,synopsis
+          ,synopsis,
+          category:{
+            create:{
+              name:category
+            }
+          }
         }
      })
 
-console.log(product)
-  return Response.json(product)
+
+  return Response.json(JSON.stringify({product}))
     }
 
    catch (error) {
      console.error(error)
-     return NextResponse.json(JSON.stringify(error))
+     return Response.json(error)
    } 
 }
