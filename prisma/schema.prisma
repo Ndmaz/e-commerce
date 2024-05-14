@@ -28,17 +28,19 @@ enum role {
 model Product {
   id          Int       @id @default(autoincrement())
   productname        String @unique
-productcode       String?
+  productcode       String?
   synopsis    String
   description String?
   details    String?
   price       Float?
-  img       String
+  quanity      Int
+  images       String
   category    Category @relation(fields: [categoryid],references: [id])
   categoryid Int
   reviews     Review[]
 }
-
+//quanity
+//availability
 model Category {
   id       Int       @id @default(autoincrement())
   name     String    @unique

@@ -1,4 +1,14 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {}
+const nextConfig = {
+
+images:{
+    remotePatterns:[
+    {
+        protocol:'https',
+        hostname:'ecommercemountain.storage.iran.liara.space'
+    }
+]
+}
+}
 
 module.exports = nextConfig
