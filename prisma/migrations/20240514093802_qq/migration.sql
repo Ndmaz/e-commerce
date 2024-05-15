@@ -1,20 +1,29 @@
-/*
-  Warnings:
+-- CreateEnum
+CREATE TYPE "role" AS ENUM ('USER', 'ADMIN');
 
-  - A unique constraint covering the columns `[email]` on the table `User` will be added. If there are existing duplicate values, this will fail.
+-- CreateTable
+CREATE TABLE "User" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT,
+    "email" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "role" "role" NOT NULL DEFAULT 'USER',
 
-*/
--- AlterTable
-ALTER TABLE "User" ADD COLUMN     "role" TEXT NOT NULL DEFAULT 'USER';
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "Product" (
     "id" SERIAL NOT NULL,
-    "name" TEXT NOT NULL,
-    "description" TEXT NOT NULL,
-    "price" DOUBLE PRECISION NOT NULL,
-    "image" TEXT NOT NULL,
-    "categoryname" TEXT NOT NULL,
+    "productname" TEXT NOT NULL,
+    "productcode" TEXT,
+    "synopsis" TEXT,
+    "description" TEXT,
+    "details" TEXT,
+    "price" DOUBLE PRECISION,
+    "quanity" INTEGER,
+    "images" TEXT,
+    "categoryid" INTEGER NOT NULL,
 
     CONSTRAINT "Product_pkey" PRIMARY KEY ("id")
 );
@@ -53,13 +62,16 @@ CREATE TABLE "Order" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Category_name_key" ON "Category"("name");
-
--- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "Product_productname_key" ON "Product"("productname");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Category_name_key" ON "Category"("name");
+
 -- AddForeignKey
-ALTER TABLE "Product" ADD CONSTRAINT "Product_categoryname_fkey" FOREIGN KEY ("categoryname") REFERENCES "Category"("name") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Product" ADD CONSTRAINT "Product_categoryid_fkey" FOREIGN KEY ("categoryid") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Review" ADD CONSTRAINT "Review_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

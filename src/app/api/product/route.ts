@@ -48,6 +48,7 @@ const theimageurls:string=permanentLink.toString()
          })
          return Response.json({product})
   }else{
+   
 const product = await prisma.product.create({
   data:{
     productname

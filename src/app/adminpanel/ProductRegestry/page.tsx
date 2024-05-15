@@ -1,6 +1,7 @@
 "use client"
 import { S3 } from 'aws-sdk';
- 
+import{ S3Client, PutObjectCommand ,GetObjectCommand} from '@aws-sdk/client-s3'
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import { CheckIcon } from '@radix-ui/react-icons';
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -35,10 +36,10 @@ export default function Productmanagement(){
   const [error, setError] = useState<String>();
  const [issubmiting,setissubmiting]=useState<Boolean>(false)
 //env variable section
-const ACCESSKEY = process.env.NEXT_PUBLIC_LIARA_ACCESS_KEY               
-const SECRETKEY = process.env.NEXT_PUBLIC_LIARA_SECRET_KEY                 
-const ENDPOINT  =  process.env.NEXT_PUBLIC_LIARA_ENDPOINT
-const BUCKET    = process.env.NEXT_PUBLIC_LIARA_BUCKET_NAME
+const ACCESSKEY : string|undefined = process.env.NEXT_PUBLIC_LIARA_ACCESS_KEY               
+const SECRETKEY : string|undefined= process.env.NEXT_PUBLIC_LIARA_SECRET_KEY                 
+const ENDPOINT : string|undefined =  process.env.NEXT_PUBLIC_LIARA_ENDPOINT
+const BUCKET : string|undefined   = process.env.NEXT_PUBLIC_LIARA_BUCKET_NAME
 
 
 
@@ -52,19 +53,46 @@ async function handleUpload(e:React.ChangeEvent<HTMLInputElement>) {
     setError('there is no file selected')
       return;
     }
+/*
+    const client = new S3Client({ 
+         region: "default"
+    ,endpoint:  ENDPOINT
+    ,credentials: {
+      accessKeyId: ACCESSKEY as string
+      ,secretAccessKey: SECRETKEY as string
+    }
+  })
 
-    const s3 = new S3({
+  const params = {
+    Bucket: BUCKET,
+    Key: file.name,
+    Body: file,
+  }
+  await client.send(new PutObjectCommand(params))
+  
+  const command = new GetObjectCommand(params);
+  await getSignedUrl(client, command,{ expiresIn:  131536000 }).then((url) =>setPermanentLink((pervarray)=>[...pervarray,url]));
+*/
+
+    const s3 = new S3(
+      
+      {
       accessKeyId: ACCESSKEY,
       secretAccessKey: SECRETKEY,
       endpoint: ENDPOINT,
+      region: "default"
     });
     const params = {
       Bucket: BUCKET,
       Key: file.name,
       Body: file,
+      
     }
+  
+    console.log(s3)
     const response = await s3.upload(params).promise();
 
+    console.log(response)
     // Get permanent link
     const permanentSignedUrl = await s3.getSignedUrl('getObject', {
       Bucket: BUCKET,
@@ -72,6 +100,7 @@ async function handleUpload(e:React.ChangeEvent<HTMLInputElement>) {
       Expires: 131536000, // 4 year
     });
     setPermanentLink((pervarray)=>[...pervarray,permanentSignedUrl]);
+
 
     console.log('File uploaded successfully');
 
