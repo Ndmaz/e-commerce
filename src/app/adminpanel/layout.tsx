@@ -33,6 +33,10 @@ export default async function Adminlayout ({children}:{children:React.ReactNode}
           <div className=" my-4 mx-5">
       <p> مدیریت کاربران   </p>     
           </div>
+          <div className=" my-4 mx-5">
+      <p> مدیریت صفحه اصلی </p>     
+          </div>
+
 </div> 
 
 

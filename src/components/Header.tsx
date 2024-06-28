@@ -6,6 +6,7 @@ import authOptions from "@/lib/auth"
 import { LogOutButton, LoginButton } from "./SignAuth"
 import { Input } from "./ui/input"
 import Searchbar from "./Searchbar"
+import Providers from "./Providers"
 
  async function Header (){
 
@@ -29,7 +30,9 @@ import Searchbar from "./Searchbar"
   </div>}
 
 </div>
+
 <Searchbar/>
+
 {/*navbar */}
 <div className="hidden md:flex md:flex-row-reverse md:space-x-4 mr-8">
    
