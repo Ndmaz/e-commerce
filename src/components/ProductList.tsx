@@ -28,7 +28,7 @@ export default function ProductList(){
 
     return(
 
-    <div className="flex flex-wrap">
+    <div className="flex flex-wrap mb-[1rem]">
 
      {data?.map((item)=>{
        return( <Productcard

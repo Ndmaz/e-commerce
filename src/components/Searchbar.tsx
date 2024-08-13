@@ -6,21 +6,7 @@ import { useQuery } from "react-query";
  
  export default function Searchbar() {
    const [values,setvalue]=useState()
-   const {data}=useQuery(
-['search',values],
-async()=>{
-    try {
-         const data= await fetch('',{
-        method:'GET'
-        ,headers:{'Content-Type':'application/json'}
-        ,body:JSON.stringify({values})
-    }  )
-    } catch (error) {
-        
-    }
-   
-}
-   )
+  
 
 
 

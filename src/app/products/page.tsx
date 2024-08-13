@@ -9,7 +9,7 @@ export default  function Products(){
 
 
 
-    return<div className="mb-[6rem]">
+    return<div className="mb-[14rem]">
 
         products
  

@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import Carouselhandle from '@/components/Carouselhandle'
+
 import { getServerSession } from 'next-auth'
 import authOptions from '@/lib/auth'
 
@@ -9,7 +9,7 @@ export default async function Home() {
      <div>
   <p className='inline-block'> {JSON.stringify(session)}</p>
      
-     <Carouselhandle/>
+    
      
   </div>
   )

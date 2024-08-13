@@ -26,7 +26,19 @@ export default function Productmanagement(){
    const [quanity,setquanity]=useState('')
    const [synopsis,setSynopsis]=useState('')
    const [description,setDescription]=useState('')
-   const [permanentLink, setPermanentLink] = useState<String[]>([]);
+   //permenant link is an object that holds the value to the urls
+   interface Linktypes{
+    pic1:string
+    pic2:string
+    pic3:string
+    pic4:string
+   }
+   const [permanentLink, setPermanentLink] = useState<Linktypes>({
+    pic1:""
+    ,pic2:""
+    ,pic3:""
+    ,pic4:""
+   });
    const [details,setdetails]=useState([])
    const [key1,setkey1]=useState('')
    const [key2,setkey2]=useState('')
@@ -99,7 +111,8 @@ async function handleUpload(e:React.ChangeEvent<HTMLInputElement>) {
       Key: file.name,
       Expires: 131536000, // 4 year
     });
-    setPermanentLink((pervarray)=>[...pervarray,permanentSignedUrl]);
+    
+    setPermanentLink();
 
 
     console.log('File uploaded successfully');
