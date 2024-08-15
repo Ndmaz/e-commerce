@@ -14,6 +14,9 @@ import { useMutation } from "react-query";
 import Image from 'next/image';
 import { MdPlaylistAdd } from "react-icons/md"
 
+
+
+
 export default function Productmanagement(){
 
 
@@ -26,6 +29,7 @@ export default function Productmanagement(){
    const [quanity,setquanity]=useState('')
    const [synopsis,setSynopsis]=useState('')
    const [description,setDescription]=useState('')
+   const [imagechecked,setimagechecked]=useState('')
    //permenant link is an object that holds the value to the urls
    interface Linktypes{
     pic1:string
@@ -53,6 +57,9 @@ const SECRETKEY : string|undefined= process.env.NEXT_PUBLIC_LIARA_SECRET_KEY
 const ENDPOINT : string|undefined =  process.env.NEXT_PUBLIC_LIARA_ENDPOINT
 const BUCKET : string|undefined   = process.env.NEXT_PUBLIC_LIARA_BUCKET_NAME
 
+
+    
+  
 
 
 async function handleUpload(e:React.ChangeEvent<HTMLInputElement>) {
@@ -111,8 +118,21 @@ async function handleUpload(e:React.ChangeEvent<HTMLInputElement>) {
       Key: file.name,
       Expires: 131536000, // 4 year
     });
-    
-    setPermanentLink();
+    switch(imagechecked){
+      case 'عکس کوچک محصول': 
+      setPermanentLink((prev)=>({...prev,pic1:permanentSignedUrl}))
+      break
+      case 'عکس اصلی محصول':
+        setPermanentLink((prev)=>({...prev,pic2:permanentSignedUrl}))
+        break
+      case 'عکس محصول جانبی1':
+        setPermanentLink((prev)=>({...prev,pic3:permanentSignedUrl}))
+        break
+      case 'عکس محصول جانبی 2':
+        setPermanentLink((prev)=>({...prev,pic4:permanentSignedUrl}))
+        break
+    }
+   ;
 
 
     console.log('File uploaded successfully');
@@ -147,23 +167,24 @@ const submitForm = async () => {
     if (res.ok) {
 
       alert('Product created successfully!');
-    
+ 
       
       
     } else {
       alert('Failed to create product!');
-      
+    setError('200')
     }
 
   } catch (error) {
     console.log(error)
   }
 }
-const { mutate } = useMutation(submitForm);
+const { mutate ,isSuccess,data} = useMutation(submitForm);
 
   function Handlesubmit(event: React.FormEvent<HTMLFormElement>){
     event.preventDefault()
     mutate()
+   
    }
 
 
@@ -237,30 +258,62 @@ return <div className='flex flex-grow justify-center' key={detail.detailname}><p
 
 
            <br /> 
-           <Label className="ml-auto" htmlFor="image">عکس کوچک محصول
-           <Input name="image"  type="file"   onChange={handleUpload}/>
-            {permanentLink[0]&&<CheckIcon className='text-green-600 ' />}
+
+           <div className='flex flex-col pb-3 space-y-2'>
+
+      <label className='border rounded-sm'>عکس کوچک محصول
+      <input 
+      type="radio" 
+      name="dd" 
+      id="" 
+      value='عکس کوچک محصول' 
+      checked={imagechecked==='عکس کوچک محصول'} 
+      onChange={(e)=>setimagechecked(e.target.value)} />
+      {permanentLink.pic1!=''?<CheckIcon className='text-green-500'/>:''}
+      </label>
+
+      <label className='border rounded-sm'>عکس اصلی محصول
+      <input 
+      type="radio" 
+      name="dd" 
+      id="" 
+      value='عکس اصلی محصول' 
+      checked={imagechecked==='عکس اصلی محصول'} 
+      onChange={(e)=>setimagechecked(e.target.value)} />
+       {permanentLink.pic2!=''?<CheckIcon className='text-green-500'/>:''}
+      </label>
+
+      <label className='border rounded-sm'>عکس محصول جانبی1
+      <input 
+      type="radio" 
+      name="dd" 
+      id="" 
+      value='عکس محصول جانبی1' 
+      checked={imagechecked==='عکس محصول جانبی1'} 
+      onChange={(e)=>setimagechecked(e.target.value)} />
+       {permanentLink.pic3!=''?<CheckIcon className='text-green-500'/>:''}
+      </label>
+
+      <label className='border rounded-sm'>عکس محصول جانبی 2
+      <input 
+      type="radio" 
+      name="dd" 
+      id="" 
+      value='عکس محصول جانبی 2' 
+      checked={imagechecked==='عکس محصول جانبی 2'} 
+      onChange={(e)=>setimagechecked(e.target.value)} />
+       {permanentLink.pic4!=''?<CheckIcon className='text-green-500'/>:''}
+      </label>
+
+</div>
+      <Label>
+      {imagechecked}
+           <Input type="file" onChange={handleUpload} />
            </Label>
-           <br />
-           <Label className="ml-auto" htmlFor="image">عکس اصلی محصول
-           <Input name="image"  type="file"   onChange={handleUpload}/>
-           {permanentLink[1]&&<CheckIcon className='text-green-600 ' />} 
-           </Label> 
-           <br />
-           <Label className="ml-auto" htmlFor="image">عکس محصول جانبی1 
-           <Input name="image"  type="file"   onChange={handleUpload}/>
-           {permanentLink[2]&&<CheckIcon className='text-green-600 ' />} 
-           </Label>
-           <br />
-           <Label className="ml-auto" htmlFor="image">عکس محصول جانبی 2
-           <Input name="image"  type="file"  onChange={handleUpload}/>
-           {permanentLink[3]&&<CheckIcon className='text-green-600 ' />} 
-           </Label>
-        
-           
            </div>
            <Button  type="submit" className="w-full">ثبت محصول   {issubmiting&&<CgSpinner className='animate-spin' />}</Button>
-        
+     
+  
  
      </form>
      <div className="mt-4 mb-28 md:mb-4 mx-auto text-right">

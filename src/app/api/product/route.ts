@@ -22,7 +22,7 @@ try {
      ,permanentLink} = await req.json()
 
 const detalsinstring:string=JSON.stringify(details)
-const theimageurls:string=permanentLink.toString()
+const theimageurls:string=JSON.stringify(permanentLink)
   //checking if there is a category
   const CheckCategory=await prisma.category.findUnique({
     where:{
