@@ -21,12 +21,12 @@ import ImageEdit from "./ImageEdit"
 //4. the rest are just a small string and an input gets shown
 
 
-export default function Editfield(id) {
+export default function Editfield() {
 
 const fieldname=usePE((state)=>state.fieldname)
 const productinfo=usePE((state)=>state.productsinfo)
 const [Editinput,setEditinput]=useState('')
-
+const id=productinfo.id
 async function  mutate(){
 
   try {
@@ -57,20 +57,7 @@ switch(fieldname){
   default:
     break
 }
-/*if(fieldname=='عکس'){
 
-  
-
-}else if(fieldname=='مشخصات'){
-
- 
-
-}else if(fieldname=='توضیح کوتاه'||fieldname=='توضیح کامل'){
-
-  return<TextareaEdit/>
-
-}
- */
 
 //the default
 
@@ -82,15 +69,22 @@ console.log(productinfo)
   return (
     <div className="flex space-x-4 items-center ">
 
-      
-     {productinfo.productname}
-
+      <div className="flex space-x-4 items-center "> 
+         {productinfo.productname}
 <Label className="m-4  ">{fieldname}</Label>
- <Input className="w-50" name={fieldname} type="text" value={Editinput} onChange={(e)=>setEditinput(e.target.value)} />  
+ <Input className="w-[40vw]" name={fieldname} type="text" value={Editinput} onChange={(e)=>setEditinput(e.target.value)} />  
 
-  <Button type="button" className=" my-auto" onClick={mutation.mutate}>ثبت تغیر</Button>
-{mutation.isLoading&&<CgSpinner strokeWidth='1' className='animate-spin text-5xl' />}
+      </div>
+   
+
+
+  <Button type="button" className=" my-auto" onClick={mutation.mutate}>
+    ثبت تغیر
+    {mutation.isLoading&&<CgSpinner strokeWidth='1' className='animate-spin text-5xl' />}
 {mutation.isSuccess&&<CheckIcon className='text-green-600 ' />}
+</Button>
+
+
 
     </div>
   )

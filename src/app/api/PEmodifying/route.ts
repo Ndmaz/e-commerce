@@ -10,7 +10,7 @@ export async function POST(req:Request) {
     try {
 
  const {Editinput,fieldname,id}=await req.json()  
-const idd=parseFloat(id.id)
+const idd=parseFloat(id)
   
     switch (fieldname){
         case 'اسم محصول':
@@ -71,7 +71,50 @@ const pn= await prisma.product.update({
                         return Response.json({error})
                     }
 break;
-
+case 'توضیح کامل':
+    try {
+           
+        const pn= await prisma.product.update({
+                    where:{ id: idd }
+                    ,data:{description:Editinput}
+                })
+                
+               return Response.json({pn})
+                    } catch (error) {
+                       
+                        return Response.json({error})
+                    }
+break;
+case 'توضیح کوتاه':
+    try {
+            
+        const pn= await prisma.product.update({
+                    where:{ id: idd }
+                    ,data:{synopsis:Editinput
+                        
+                    }
+                })
+                
+               return Response.json({pn})
+                    } catch (error) {
+                       
+                        return Response.json({error})
+                    }
+break;
+case 'عکس':
+    try {
+        const theimageurls:string=JSON.stringify(Editinput)
+        const pn= await prisma.product.update({
+                    where:{ id: idd }
+                    ,data:{images:theimageurls}
+                })
+                
+               return Response.json({pn})
+                    } catch (error) {
+                       
+                        return Response.json({error})
+                    }
+break;
     }
         
     } catch (error) {

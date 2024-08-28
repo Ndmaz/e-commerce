@@ -14,8 +14,9 @@ import { useAPE } from '@/store/AsyncStore/useAPE';
 export default function SearchFunction(searchvalueprop:string) {
   const fieldname=usePE((state)=>state.fieldname)
   const profuctsinfochange=usePE((state)=>state.productsinfochange)
-    type productdata={}
+    
 const {data,isLoading,isError,error}=useAPE(searchvalueprop)
+
 if (isLoading){
   return <CgSpinner strokeWidth='1' className='animate-spin text-5xl' />
 }
@@ -30,7 +31,7 @@ profuctsinfochange(data)
 <div className='w-full bg-white rounded-sm '>{data?.productname}:{data?.productcode}:{data?.id}</div>
 <Datatable
 />
-{fieldname&&<Editfield id={data?.id} />  }  
+{fieldname&&<Editfield />  }  
 {/*info field*/}
     </div>
   )
