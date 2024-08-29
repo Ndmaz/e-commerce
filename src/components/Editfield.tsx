@@ -10,7 +10,7 @@ import { useMutation } from "react-query";
 import { CgSpinner } from "react-icons/cg";
 import { CheckIcon } from "@radix-ui/react-icons";
 import { Button } from "./ui/button";
-import DefaultEdit from "./DefaultEdit";
+
 import ImageEdit from "./ImageEdit";
 
 //there is 4 options:
@@ -24,6 +24,16 @@ export default function Editfield() {
   const productinfo = usePE((state) => state.productsinfo);
   const [Editinput, setEditinput] = useState("");
   const id = productinfo.id;
+
+  const fieldvalue =
+    fieldname == "اسم محصول"
+      ? productinfo.productname
+      : fieldname == "کد محصول"
+      ? productinfo.productcode
+      : fieldname == "قیمت"
+      ? productinfo.price
+      : productinfo.quanity;
+
   async function mutate() {
     try {
       const res = await fetch("http://localhost:3000/api/PEmodifying", {
@@ -55,12 +65,12 @@ export default function Editfield() {
 
   console.log(productinfo);
   return (
-    <div className="flex space-x-4 items-center ">
+    <div className="flex flex-col space-x-4 items-center ">
       <div className="flex space-x-4 items-center ">
-        {productinfo.productname}
+        {fieldvalue}
         <Label className="m-4  ">{fieldname}</Label>
         <Input
-          className="w-[40vw]"
+          className="w-[40vw] shadow-md"
           name={fieldname}
           type="text"
           value={Editinput}

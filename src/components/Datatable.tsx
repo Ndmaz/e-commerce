@@ -1,7 +1,6 @@
 "use client";
 
 import { CiEdit } from "react-icons/ci";
-
 import { usePE } from "@/store/usePE";
 
 function Datatable() {

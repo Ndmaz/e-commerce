@@ -1,4 +1,3 @@
-import { useQuery } from "react-query";
 import { CgSpinner } from "react-icons/cg";
 import Datatable from "./Datatable";
 
@@ -25,9 +24,6 @@ export default function SearchFunction(searchvalueprop: string) {
   return (
     <div>
       {isError && `error:${error}`}
-      <div className="w-full bg-white rounded-sm ">
-        {data?.productname}:{data?.productcode}:{data?.id}
-      </div>
       <Datatable />
       {fieldname && <Editfield />}
     </div>

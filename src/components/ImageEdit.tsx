@@ -149,15 +149,16 @@ export default function ImageEdit() {
         />
       </label>{" "}
       {uploadsuccess[4] ? <CheckIcon className="text-green-600 " /> : ""}
-      <div className="flex space-x-4 items-center ">
-        <Label className="m-4  ">{imagechecked}</Label>
-        <Input
-          className="w-[40vw]"
-          name={imagechecked}
-          type="file"
-          onChange={handleuploadfile}
-        />
-
+      <div className="flex flex-col space-x-4 items-center ">
+        <div className="flex items-center space-x-4">
+          <Label className="my-4  ">{imagechecked}</Label>
+          <Input
+            className=" w-[40vw]"
+            name={imagechecked}
+            type="file"
+            onChange={handleuploadfile}
+          />
+        </div>
         <Button type="button" className=" my-auto" onClick={mutation.mutate}>
           ثبت تغیر
           {mutation.isLoading && (
@@ -168,7 +169,7 @@ export default function ImageEdit() {
 
         {error}
       </div>
-      <p className="overflow-auto">{JSON.stringify(Editinput)}</p>
+      <p className="overflow-auto w-[60vw]">{JSON.stringify(Editinput)}</p>
     </div>
   );
 }
