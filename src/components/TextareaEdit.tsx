@@ -48,7 +48,7 @@ export default function TextareaEdit() {
         {mutation.isSuccess && <CheckIcon className="text-green-600 " />}
       </Button>
 
-      <p className=" w-[50vw]">{thefieldvalue}</p>
+      <p className=" w-[50vw] bg-[#fce1af] rounded-sm ml-1">{thefieldvalue}</p>
     </div>
   );
 }

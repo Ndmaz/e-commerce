@@ -14,7 +14,7 @@ export default function ImageEdit() {
   const fieldname = usePE((state) => state.fieldname);
   const [imagechecked, setimagechecked] = useState("");
   const id = productinfo.id;
-  const images = JSON.parse(productinfo.images);
+  const images =(productinfo.images=='')?'هیچ عکسی آپلود نشده است': JSON.parse(productinfo.images);
   const [Editinput, setEditinput] = useState(images);
 
   const [uploadsuccess, setuploadsuccess] = useState({
@@ -169,7 +169,7 @@ export default function ImageEdit() {
 
         {error}
       </div>
-      <p className="overflow-auto w-[60vw]">{JSON.stringify(Editinput)}</p>
+      <p className="overflow-auto w-[60vw] bg-[#fce1af] rounded-sm ml-1">{JSON.stringify(Editinput)}</p>
     </div>
   );
 }

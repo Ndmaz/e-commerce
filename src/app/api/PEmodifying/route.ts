@@ -102,6 +102,20 @@ export async function POST(req: Request) {
                     return Response.json({ error })
                 }
                 break;
+                case 'مشخصات':
+                    try {
+                        const thedetails: string = JSON.stringify(Editinput)
+                        const pn = await prisma.product.update({
+                            where: { id: idd }
+                            , data: { details:thedetails }
+                        })
+    
+                        return Response.json({ pn })
+                    } catch (error) {
+    
+                        return Response.json({ error })
+                    }
+                    break;
             case 'عکس':
                 try {
                     const theimageurls: string = JSON.stringify(Editinput)

@@ -13,6 +13,7 @@ export default function ProductEditing() {
   const fieldnameChange = usePE((state) => state.fieldnamechange);
   return (
     <div className="mt-6" dir="rtl">
+      <h1 className="mr-4 text-xl font-mono font-bold">ویرایش محصول</h1>
       <div className="w-[35vw] flex ml-auto mr-4">
         <input
           className="bg-white w-full rounded-r-lg pr-2 "

@@ -67,7 +67,7 @@ export default function Editfield() {
   return (
     <div className="flex flex-col space-x-4 items-center ">
       <div className="flex space-x-4 items-center ">
-        {fieldvalue}
+       <p className="bg-[#fce1af] rounded-sm ml-1">{fieldvalue}</p> 
         <Label className="m-4  ">{fieldname}</Label>
         <Input
           className="w-[40vw] shadow-md"

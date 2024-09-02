@@ -18,7 +18,7 @@ function Datatable() {
   ];
 
   return (
-    <table className="flex flex-wrap bg-[#e5f9fa]">
+    <table className="flex flex-wrap rounded-sm bg-[#e5f9fa]">
       {products.map((item) => {
         return (
           <tr className="p-2 bg-[#bee2c1] rounded-sm m-1" key={item}>

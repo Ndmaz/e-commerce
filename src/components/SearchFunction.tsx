@@ -22,7 +22,7 @@ export default function SearchFunction(searchvalueprop: string) {
   }
   profuctsinfochange(data);
   return (
-    <div>
+    <div className="md:w-fit">
       {isError && `error:${error}`}
       <Datatable />
       {fieldname && <Editfield />}
