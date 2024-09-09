@@ -23,9 +23,10 @@ export default function RootLayout({
   
   return (
     <html lang="" dir='' >
-      <body className='font-serif'>
+      <body className='font-mono'>
         <Providers>
         <Header />
+       
        <main className=' my-[5rem]     sticky md:static top-[5rem] md:h-[100vh] h-[100vh] '>
 
   {children}
