@@ -36,16 +36,16 @@ import Providers from "./Providers"
 {/*navbar */}
 <div className="hidden md:flex md:flex-row-reverse md:space-x-4 mr-8">
    
-   <Link  href='/' className="m-3 p-1 text-sm md:font-bold hover:bg-slate-200 hover:rounded-md">
+   <Link  href='/' className="m-3 p-1 text-sm md:font-bold hover:border-b-2 hover:border-blue-600 transition ease-in-out duration-100 ">
         خانه
         </Link>
-        <Link  href='/products' className="m-3 p-1 text-sm md:font-bold hover:bg-slate-200 hover:rounded-md">
+        <Link  href='/products' className="m-3 p-1 text-sm md:font-bold hover:border-b-2 hover:border-blue-600 transition ease-linear ">
         محصولات
         </Link>
-        <Link  href='/' className="m-3 p-1 text-sm md:font-bold hover:bg-slate-200 hover:rounded-md">
+        <Link  href='/' className="m-3 p-1 text-sm md:font-bold hover:border-b-2 hover:border-blue-600 transition ease-in-out ">
        درباره ما
         </Link>
-        <Link  href='/panel' className="m-3 p-1 text-sm md:font-bold hover:bg-slate-200 hover:rounded-md">
+        <Link  href='/panel' className="m-3 p-1 text-sm md:font-bold hover:border-b-2 hover:border-blue-600 transition ease-in-out  ">
         پنل کاربری
         </Link>
 </div>

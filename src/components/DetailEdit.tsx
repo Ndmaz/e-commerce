@@ -9,8 +9,12 @@ import { CheckIcon } from "@radix-ui/react-icons";
 
 export default function DetailEdit() {
   const productinfo = usePE((state) => state.productsinfo);
+ 
+
+    
   const id = productinfo.id;
   const fieldname = usePE((state) => state.fieldname);
+
   const details = JSON.parse(productinfo.details);
   const [newdetails, setnewdetails] = useState(details);
   const [detailcheck, setdetailcheck] = useState([details[0].detailname, 0]);
@@ -63,7 +67,7 @@ export default function DetailEdit() {
             <th>توصیف</th>
           </tr>
         </thead>
-        <tbody>{showdetails}</tbody>
+        <tbody>{ showdetails}</tbody>
       </table>
       {detailcheck[0]}
 

@@ -51,6 +51,9 @@ export default function Editfield() {
     case "عکس":
       return <ImageEdit />;
     case "مشخصات":
+      if(productinfo.details==='[]'){
+        return <div>مشخصات وجود ندارد</div>
+      }
       return <DetailEdit />;
     case "توضیح کوتاه":
       return <TextareaEdit />;

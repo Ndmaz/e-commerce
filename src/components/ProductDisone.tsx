@@ -16,7 +16,7 @@ export default function ProductDisone() {
   return (
     <div
       dir="rtl"
-      className="flex flex-col md:flex-row m-2 rounded-md  p-2 md:mx-4 bg-slate-400"
+      className="flex flex-col md:flex-row my-2 rounded-md  p-2 md:mx-4 bg-slate-400"
     >
       <div className="md:w-[30vw] relative ">
         {slidenum == 1 && (
