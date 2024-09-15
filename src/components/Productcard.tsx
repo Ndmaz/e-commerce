@@ -13,7 +13,7 @@ export default function Productcard({
 
   return (
     <div
-      className="flex flex-col content-between h-full md:block w-[15rem] mt-4 ml-7 p-1 "
+      className="flex flex-col content-between h-[16rem] md:block w-[15rem] mt-4 ml-7 p-1 "
       dir="rtl"
     >
       <div className=" ">

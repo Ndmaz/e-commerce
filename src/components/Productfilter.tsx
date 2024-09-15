@@ -1,80 +1,99 @@
 import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { useAGetcategories } from "@/store/AsyncStore/useAGetcategories";
+import { useAGetproducts } from "@/store/AsyncStore/useAGetproducts";
+
+import { useparameters } from "@/store/useparameters";
 
 export default function Productfilter() {
   const { data } = useAGetcategories();
-  const [price1, setprice1] = useState();
-  const [price2, setprice2] = useState();
-  const [category, setcategory] = useState();
+  
+  const pagechange = useparameters((state) => state.pagechange);
+  const categorychange = useparameters((state) => state.categorychange);
+  const pricechange = useparameters((state) => state.pricechange);
+  const flipchange = useparameters((state) => state.flipchange);
+  const flip = useparameters((state) => state.flip);
+  type pricetype = {
+    price1: string;
+    price2: string;
+  };
+  const [pricefilter, setpricefilter] = useState<pricetype>({
+    price1: "",
+    price2: "",
+  });
+
+  const [categoryfilter, setcategoryfilter] = useState("");
   const [formerr, setformerr] = useState("");
- 
 
   return (
-    <div className="w-[40vw] md:w-[20vw] pr-2">
+    <div className="flex pr-2 mb-8 ml-8 ">
       <p> فیلتر بر اساس:</p>
-      <hr className="my-1 text-black" />
-      <div>
-        <p className="font-bold  my-1">قیمت</p>
+     
+      <div className="border-l-[1px] border-[#f7e0f0d0] p-2">
+        <p className="font-bold border-t-[1px]  border-[#922b7383] pr-1">قیمت:</p>
         از
         <input
           className="w-[4em] mx-1 rounded-sm"
           type="text"
-          value={price1}
-          onChange={(e) => setprice1(e.target.value)}
+          value={pricefilter.price1}
+          onChange={(e) =>
+            setpricefilter((prev) => ({ ...prev, price1: e.target.value }))
+          }
         />
         تا
         <input
           className="w-[4em] mx-1 rounded-sm"
           type="text"
-          value={price2}
-          onChange={(e) => setprice2(e.target.value)}
+          value={pricefilter.price2}
+          onChange={(e) =>
+            setpricefilter((prev) => ({ ...prev, price2: e.target.value }))
+          }
         />
         هزار تومان
       </div>
-      <hr className="my-1" />
-      <div>
-        <p className="font-bold my-1">نوع محصول</p>
+      
+      <div className="p-2">
+        <p className="font-bold border-t-[1px]   border-[#922b7383] ">نوع محصول:</p>
         <select
           className="rounded-sm my-2 w-[30vw] md:w-full"
           name=""
           id=""
-          value={category}
-          onChange={(e) => setcategory(e.target.value)}
+          value={categoryfilter}
+          onChange={(e) => setcategoryfilter(e.target.value)}
         >
-          <option value="default">همه موارد</option>
+          <option value="">همه موارد</option>
           {data?.map((item) => {
             return (
-              <option key={item.id} value={item.name}>
+              <option key={item.id} value={item.id}>
                 {item.name}
               </option>
             );
           })}
         </select>
       </div>
-      <hr className="my-1" />
-      <div>
-        <p className="font-bold my-1">برند محصول</p>
-        <select
-          className="rounded-sm my-2  w-[30vw] md:w-full"
-          name=""
-          id=""
-          value={category}
-          onChange={(e) => setcategory(e.target.value)}
-        >
-          <option value="default">همه موارد</option>
-          {data?.map((item) => {
-            return (
-              <option key={item.id} value={item.name}>
-                {item.name}
-              </option>
-            );
-          })}
-        </select>
-      </div>
-      <hr className="my-1" />
-      {formerr}
-      <Button onClick={()=>{}}>اعمال تغییرات</Button>
+     
+
+      
+
+      <Button className="mr-2"
+        onClick={() => {
+          if (pricefilter.price1 == "" && pricefilter.price2 == "") {
+            categorychange(categoryfilter);
+            flipchange(!flip)
+            return;
+          }
+          if (categoryfilter == "") {
+            pricechange(pricefilter);
+            flipchange(!flip)
+            return
+          }
+          pricechange(pricefilter);
+          categorychange(categoryfilter);
+          flipchange(!flip)
+        }}
+      >
+        اعمال تغییرات
+      </Button>
     </div>
   );
 }

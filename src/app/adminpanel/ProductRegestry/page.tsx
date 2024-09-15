@@ -1,21 +1,16 @@
 "use client";
 import { S3 } from "aws-sdk";
-import {
-  S3Client,
-  PutObjectCommand,
-  GetObjectCommand,
-} from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+
 import { CheckIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CgSpinner } from "react-icons/cg";
-import Link from "next/link";
+
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { useMutation } from "react-query";
-import Image from "next/image";
+
 import { MdPlaylistAdd } from "react-icons/md";
 
 export default function Productmanagement() {

@@ -3,10 +3,15 @@ import { useQuery } from "react-query";
 
 
 
-export const useAGetproducts = () => {
+export const useAGetproducts = (page,price,category,flip) => {
     async function queryfunction() {
         try {
-            const res = await fetch("http://localhost:3000/api/gettingproducts");
+            const res = await fetch("http://localhost:3000/api/gettingproducts",{
+                method:'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ page,price,category })
+
+            });
             if (res.ok) {
                 const datas = await res.json();
                 const products = datas.products;
@@ -16,6 +21,6 @@ export const useAGetproducts = () => {
             return error
         }
     }
-    return useQuery('datas', queryfunction)
+    return useQuery(['pages',page,flip], queryfunction)
 }
 

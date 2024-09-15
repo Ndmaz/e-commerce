@@ -2,15 +2,21 @@
 
 import Productcard from "@/components/Productcard";
 import { useAGetproducts } from "@/store/AsyncStore/useAGetproducts";
-import { useProductshold } from "@/store/useProductshold";
+import { useparameters } from "@/store/useparameters";
+
 import Link from "next/link";
+
 import { CgSpinner } from "react-icons/cg";
 
 
-
 export default function ProductList() {
-  const { data, isLoading} = useAGetproducts();
+  const page = useparameters((state) => state.page);
+  const category = useparameters((state) => state.category);
+  const price = useparameters((state) => state.price);
+  const flip=useparameters((state)=>state.flip)
   
+  const { data, isLoading } = useAGetproducts(page,price,category,flip);
+
   if (isLoading) {
     return (
       <div className="flex  w-full justify-center">
@@ -18,10 +24,9 @@ export default function ProductList() {
       </div>
     );
   }
-  
+
   return (
-    <div className="flex flex-wrap mb-[1rem] pr-4">
-      
+    <div className="flex flex-wrap mb-[1rem] pr-4 ">
       {data?.map((item) => {
         return (
           <Link
@@ -38,6 +43,7 @@ export default function ProductList() {
           </Link>
         );
       })}
+     
     </div>
   );
 }
