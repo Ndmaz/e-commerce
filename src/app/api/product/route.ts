@@ -63,6 +63,8 @@ export async function POST(req: Request, res: Response) {
           , category: {
             create: {
               name: category
+            ,categoryimage:''
+            
             }
           }
         }

@@ -23,7 +23,7 @@ export default function Productfilter() {
   });
 
   const [categoryfilter, setcategoryfilter] = useState("");
-  const [formerr, setformerr] = useState("");
+  
 
   return (
     <div className="flex pr-2 mb-8 ml-8 ">

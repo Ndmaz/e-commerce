@@ -22,7 +22,7 @@ export default function RootLayout({
 
   
   return (
-    <html lang="" dir='' >
+    <html lang=""  dir='' >
       <body className='font-mono'>
         <Providers>
         <Header />
