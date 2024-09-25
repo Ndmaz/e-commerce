@@ -91,7 +91,7 @@ export default function Categoryfilter() {
           {mutation.isLoading && <CgSpinner className="animate-spin" />}
         </Button>
         {mutation.isSuccess && <CheckIcon className="text-green-600" />}
-        {mutation.data}
+       
       </div>
     </div>
   );

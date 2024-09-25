@@ -19,6 +19,7 @@ export default function Productmanagement() {
   const [productname, setProductname] = useState("");
   const [productcode, setProductcode] = useState("");
   const [category, setcategory] = useState("");
+  const [brand, setbrand] = useState("");
   const [price, setprice] = useState("");
   const [quanity, setquanity] = useState("");
   const [synopsis, setSynopsis] = useState("");
@@ -134,6 +135,7 @@ export default function Productmanagement() {
           productname,
           productcode,
           category,
+          brand,
           price,
           quanity,
           synopsis,
@@ -203,7 +205,16 @@ export default function Productmanagement() {
             />
           </Label>
           <br />
-
+          <Label className="" htmlFor="brand">
+            برند محصول
+            <Input
+              name="brand"
+              type="text"
+              value={brand}
+              onChange={(e) => setbrand(e.target.value)}
+            />
+          </Label>
+          <br />
           <Label className="" htmlFor="price">
             قیمت
             <Input
