@@ -1,7 +1,5 @@
 "use client";
 import { usePE } from "@/store/usePE";
-import DetailEdit from "./DetailEdit";
-import TextareaEdit from "./TextareaEdit";
 
 import { useState } from "react";
 import { Input } from "./ui/input";
@@ -10,31 +8,15 @@ import { useMutation } from "react-query";
 import { CgSpinner } from "react-icons/cg";
 import { CheckIcon } from "@radix-ui/react-icons";
 import { Button } from "./ui/button";
-
-import ImageEdit from "./ImageEdit";
-import PriceEdit from "./PriceEdit";
-
-//there is 4 options:
-//1. the fieldname is image so it does a radio button and a s3 action
-//2. the fieldname is detail and again the array turns into radio button and based on choice there is changing and deleting
-//3.the field name is eather description or syntax which just make the input type into textarea
-//4. the rest are just a small string and an input gets shown
-
-export default function Editfield() {
+import { useAPostpriceoff } from "@/store/AsyncStore/useAPostpriceoff";
+export default function PriceEdit() {
   const fieldname = usePE((state) => state.fieldname);
   const productinfo = usePE((state) => state.productsinfo);
   const [Editinput, setEditinput] = useState("");
+  const [Editinput2, setEditinput2] = useState("");
+  const deductedprice=productinfo.price - productinfo.priceoff
   const id = productinfo.id;
-
-  const fieldvalue =
-    fieldname == "اسم محصول"
-      ? productinfo.productname
-      : fieldname == "کد محصول"
-      ? productinfo.productcode
-      : fieldname == "قیمت"
-      ? productinfo.price
-      : productinfo.quanity;
-
+  const priceoffmutation=useAPostpriceoff(Editinput2, id)
   async function mutate() {
     try {
       const res = await fetch("http://localhost:3000/api/PEmodifying", {
@@ -48,31 +30,10 @@ export default function Editfield() {
     } catch (error) {}
   }
   const mutation = useMutation(mutate);
-  switch (fieldname) {
-    case "عکس":
-      return <ImageEdit />;
-    case "مشخصات":
-      if(productinfo.details==='[]'){
-        return <div>مشخصات وجود ندارد</div>
-      }
-      return <DetailEdit />;
-    case "توضیح کوتاه":
-      return <TextareaEdit />;
-    case "توضیح کامل":
-      return <TextareaEdit />;
-case "قیمت":
-   return <PriceEdit/>
-    default:
-      break;
-  }
-
-  //the default
-
-  console.log(productinfo);
   return (
     <div className="flex flex-col space-x-4 items-center ">
       <div className="flex space-x-4 items-center ">
-       <p className="bg-[#fce1af] rounded-sm ml-1">{fieldvalue}</p> 
+        <p className="bg-[#fce1af] rounded-sm ml-1">{productinfo.price}</p>
         <Label className="m-4  ">{fieldname}</Label>
         <Input
           className="w-[40vw] shadow-md"
@@ -90,6 +51,30 @@ case "قیمت":
         )}
         {mutation.isSuccess && <CheckIcon className="text-green-600 " />}
       </Button>
+      <div className="mt-4 space-y-3">
+        <p className="font-bold">
+          {" "}
+          تخفیفات:{(productinfo.priceoff == null)? "بدون تخفیف":deductedprice}
+        </p>
+        <div>
+          <label>اضافه کردن تخفیف</label>
+          <input
+            className="rounded-md mr-2"
+            type="text"
+            value={Editinput2}
+            onChange={(e) => setEditinput2(e.target.value)}
+          />
+          هزار تومان
+        </div>
+        <Button variant={"secondary"} onClick={priceoffmutation.mutate}>
+        {priceoffmutation.isLoading && (
+          <CgSpinner strokeWidth="1" className="animate-spin text-5xl" />
+        )}
+        {priceoffmutation.isSuccess && <CheckIcon className="text-green-600 " />}
+          تائید تخفیف
+        </Button>
+      </div>
     </div>
   );
 }
+//

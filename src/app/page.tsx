@@ -15,7 +15,7 @@ export default function Home() {
   const image =
     "https://ecommercemountain.storage.iran.liara.space/beach-campfire-4184-x-2779-wallpaper-gauuk7tw4u9qof5v.jpg?AWSAccessKeyId=2m48k681k2lqbaa7&Expires=1858087191&Signature=Ml2PHpa%2B%2BfPFFdGXs1t0kwOEAQs%3D";
   return (
-    <div className=" flex flex-col">
+    <div className=" flex flex-col  ">
       <div className=" w-full h-[30rem] absolute top-0 -z-10 object-cover opacity-85 ">
         <Image
           className="w-full h-full "
