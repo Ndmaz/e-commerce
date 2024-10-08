@@ -20,18 +20,23 @@ export default async function Adminlayout({
       >
         <h1 className="mx-auto mt-2">پنل کاربری</h1>
         <div className="w-full">
-
-            <div className=" my-4  " >
-                <p>مدیریت صفحه اصلی</p>
-                <div className="flex flex-col items-center space-y-2  ">
-                <Link
+          <div className=" my-4  ">
+            <p>مدیریت صفحه اصلی</p>
+            <div className="flex flex-col items-center space-y-2  ">
+              <Link
                 className="bg-[rgb(162,190,163)] hover:bg-slate-300 rounded-lg py-3 px-2 w-full"
                 href="/adminpanel/Categoryfilter"
               >
-              
-تغییرات دسته بندی              </Link>
-                </div>
+                تغییرات دسته بندی
+              </Link>
+              <Link
+                className="bg-[rgb(162,190,163)] hover:bg-slate-300 rounded-lg py-3 px-2 w-full"
+                href="/adminpanel/Brandfilter"
+              >
+                تغییرات برند
+              </Link>
             </div>
+          </div>
           <div className=" my-4  ">
             <p>مدیریت محصولات</p>
             <div className="flex flex-col items-center space-y-2  ">
@@ -39,7 +44,6 @@ export default async function Adminlayout({
                 className="bg-[rgb(162,190,163)] hover:bg-slate-300 rounded-lg py-3 px-2 w-full"
                 href="/adminpanel/ProductRegestry"
               >
-              
                 ثبت محصولات
               </Link>
               <Link
@@ -63,14 +67,12 @@ export default async function Adminlayout({
                 className="bg-[rgb(162,190,163)] hover:bg-slate-300 rounded-lg py-3 px-2 w-full"
                 href="/adminpanel/NewOrder"
               >
-                
                 سفارشات تازه
               </Link>
               <Link
                 className="bg-[rgb(162,190,163)] hover:bg-slate-300 rounded-lg py-3 px-2 w-full"
                 href="/adminpanel/NewOrder"
               >
-               
                 سفارشات گذشته
               </Link>
             </div>

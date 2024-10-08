@@ -38,6 +38,7 @@ export default function ProductList() {
               productname={item.productname}
               productcode={item.productcode}
               price={item.price}
+             priceoff={item.priceoff}
               images={item.images}
             />
           </Link>
