@@ -6,10 +6,10 @@ export default function Brandimagescarousel() {
   const { data } = useAGetbrands();
   const [emblaRef] = useEmblaCarousel();
   return (
-    <div className="flex" ref={emblaRef}>
+    <div className="flex overflow-hidden" ref={emblaRef}>
       <div className="flex mx-auto space-x-4">
         {data?.map((item) => {
-          return <div key={item.id}>
+          return <Link className="flex-[0_0_40%] md:flex-[0_0_20%]" key={item.id} href=''>
              <Image
                     className="h-[20rem] rounded-md  "
                     width={200}
@@ -18,7 +18,7 @@ export default function Brandimagescarousel() {
                     src={item.brandimage}
                   />
             {item.name}
-            </div>;
+            </Link>;
         })}
       </div>
     </div>

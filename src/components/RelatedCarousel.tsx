@@ -17,7 +17,9 @@ if (isLoading){
 </div>
 }
   const maped = data?.map((product) => {
-    
+    if(productinfo.productname==product.productname){
+      return
+    }
     const imagess = JSON.parse(product.images);
     const imagesss =
       product.images == `{"pic1":"","pic2":"","pic3":"","pic4":""}`
@@ -44,7 +46,7 @@ if (isLoading){
     );
   });
   return (
-    <div dir="rtl" className="bg-[#b5db9c] md:w-[95vw] rounded-sm md:mx-auto p-1 mb-20">
+    <div dir="rtl" className=" md:w-[95vw] rounded-sm md:mx-auto p-1 mb-20">
       <p >محصولات مرتبط</p>
 
       <div className="  flex space-x-2 py-2 ">

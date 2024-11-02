@@ -147,9 +147,9 @@ export default function Productmanagement() {
       const datas = await res.json;
       setissubmiting(false);
       if (res.ok) {
-        alert("Product created successfully!");
+        alert("!محصول با موفقیت ثبت شد");
       } else {
-        alert("Failed to create product!");
+        alert("محصول ثبت نشد");
         setError("200");
       }
     } catch (error) {

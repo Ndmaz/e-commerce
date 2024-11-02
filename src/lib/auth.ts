@@ -3,92 +3,90 @@ import { compare } from "bcrypt";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from 'next-auth/providers/credentials'
 
-const prisma=new PrismaClient
-const authOptions : NextAuthOptions ={
-    session:{
-        strategy:'jwt'
-    },
-    pages:{
-      signIn:'/sign-in'
-    
-    },
-  providers:[
-   CredentialsProvider({
-    name:'Sign in',
-    credentials:{
-      email:{
-        label:'Email',
-        type:'email',
-        placeholder:'hello@example.com'
+const prisma = new PrismaClient
+const authOptions: NextAuthOptions = {
+  session: {
+    strategy: 'jwt'
+  },
+  pages: {
+    signIn: '/sign-in'
+
+  },
+  providers: [
+    CredentialsProvider({
+      name: 'Sign in',
+      credentials: {
+        email: {
+          label: 'Email',
+          type: 'email',
+          placeholder: 'hello@example.com'
+
+        },
+        password: { label: 'Password', type: 'password' }
 
       },
-      password:{label:'Password',type:'password'}
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials.password) {
+          return null
+        }
+        const user = await prisma.user.findUnique({
+          where: {
+            email: credentials.email
+          }
+        })
+        if (!user) {
+          return null
+        }
 
-    },
-    async authorize(credentials){
-      if(!credentials?.email || !credentials.password){
-        return null
+        const isPasswordValid = await compare(credentials.password, user.password)
+        if (!isPasswordValid) {
+          return null
+        }
+        return {
+          id: user.id + '',
+          email: user.email,
+          name: user.name,
+          role: user.role,
+
+        }
       }
-      const user= await prisma.user.findUnique({
- where:{
-  email:credentials.email
- }
-      })
-      if(!user){
-        return null
-      }
-
-      const isPasswordValid = await compare(credentials.password,user.password)
-
-
-      if(!isPasswordValid){
-        return null
-      }
-    return{
-      id: user.id +'',
-      email:user.email,
-      name:user.name,
-      role:user.role,
-    
-    }
-    }
-   })
+    })
   ],
-  callbacks:{
-    session:({session,token})=>{
-      console.log('session callback',{session,token})
-   
-      return{
+  callbacks: {
+    session: ({ session, token }) => {
+      console.log('session callback', { session, token })
+
+      return {
         ...session,
-        user:{
+        user: {
           ...session.user,
-         id:token.id,
-         role:token.role
-          
-        
+          id: token.id,
+          role: token.role
+
+
         }
       }
-      
+
     },
-    jwt:({token,user})=>{
-      console.log("jwt callback",{token,user})
-      if(user){
-       
-        return{
+    jwt: ({ token, user }) => {
+      console.log("jwt callback", { token, user })
+      if (user) {
+
+        return {
           ...token,
-       id:user.id,
-       role:user.role
-       
-          
+          id: user.id,
+          role: user.role
+
+
         }
       }
 
 
 
-     return token
+      return token
     }
   }
-    
+
 }
 
 export default authOptions

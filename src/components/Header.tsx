@@ -1,48 +1,53 @@
+"use client";
 import Link from "next/link";
-
-import { getServerSession } from "next-auth";
-import authOptions from "@/lib/auth";
-import { LogOutButton, LoginButton } from "./SignAuth";
-import { Input } from "./ui/input";
-import Searchbar from "./Searchbar";
-import Providers from "./Providers";
-import { IoSearchOutline } from "react-icons/io5"
+import { LuShoppingCart } from "react-icons/lu";
 import Avatarsection from "./Avatarsection";
+import { SessionProvider } from "next-auth/react";
+import { useHeaders } from "@/store/useheaders";
+import Cartsidebar from "./Cartsidebar";
+import { IoSearchOutline } from "react-icons/io5";
+import Searchsidebar from "./Searchsidebar";
+import { useCartproducts } from "@/store/useCartproducts";
 
-async function Header() {
-  const session = await getServerSession(authOptions);
+function Header() {
+  const searchboolean = useHeaders((state) => state.searchboolean);
+  const searchbooleanchange = useHeaders((state) => state.searchbooleanchange);
+  const cartboolean = useHeaders((state) => state.cartboolean);
+  const cartbooleanchange = useHeaders((state) => state.cartbooleanchange);
+  const profileboolean = useHeaders((state) => state.profileboolean);
+  const profilebooleanchange = useHeaders(
+    (state) => state.profilebooleanchange
+  );
+  const products = useCartproducts((state) => state.products);
 
   return (
     <header className="flex z-10 fixed  w-full h-[5rem] top-0 justify-between bg-slate-300">
+      {cartboolean && <Cartsidebar />}
+      {searchboolean && <Searchsidebar />}
+      {}
       {/* */}
-      <div className="p-1 inline-flex">
-        <Link className="hidden md:block" href="/panel">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-6 h-6 mt-10 mr-2"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
-            />
-          </svg>
-        </Link>
+      <div className="flex my-auto ml-8 justify-between w-[8rem] relative">
+       <div> 
+        <LuShoppingCart
+          className="hidden md:block text-2xl cursor-pointer"
+          onClick={() => cartbooleanchange(true)}
+        />
+        <p className={`${(products.length==0)?'hidden':'hidden md:block'} absolute bg-red-400 text-white rounded-2xl px-1`}>{products.length}</p>
+        </div>
        
-        
-        <Avatarsection/>
-        <Searchbar />
-        
-        
+
+        <SessionProvider >
+          <Avatarsection />
+        </SessionProvider>
+
+        <IoSearchOutline
+          className="text-2xl cursor-pointer mr-auto md:mr-0"
+          onClick={() => searchbooleanchange(true)}
+        />
       </div>
 
-     
       {/*navbar */}
-      <div className="hidden md:flex md:flex-row-reverse md:space-x-4 mr-8">
+      <div className="hidden md:flex md:flex-row-reverse md:space-x-4 mr-8 ">
         <Link
           href="/"
           className="m-3 p-1 text-sm md:font-bold hover:border-b-2 hover:border-blue-600 transition ease-in-out duration-100 "
@@ -68,12 +73,9 @@ async function Header() {
           پنل کاربری
         </Link>
       </div>
- 
 
       {/* searchbar*/}
-      <div>
-        logo
-      </div>
+      <div>logo</div>
     </header>
   );
 }

@@ -16,10 +16,6 @@ import Brandimagescarousel from "@/components/Brandimagescarousel";
 
 
 export default function Home() {
-  const { data } = useAGetcategories();
-  const { data: data2, isLoading: isLoading2 } = useAGetpricedoffproducts();
-  const categorychange = useparameters((state) => state.categorychange);
-  const [emblaRef] = useEmblaCarousel();
 
   const image =
     "https://ecommercemountain.storage.iran.liara.space/beach-campfire-4184-x-2779-wallpaper-gauuk7tw4u9qof5v.jpg?AWSAccessKeyId=2m48k681k2lqbaa7&Expires=1858087191&Signature=Ml2PHpa%2B%2BfPFFdGXs1t0kwOEAQs%3D";
@@ -34,7 +30,7 @@ export default function Home() {
           src={image}
         />
       </div>
-      <div className="flex flex-col w-1/3 h-36 mr-7 ml-auto mt-[15rem] font-semibold  rounded-xl bg-[#698da5e5]">
+      <div className="flex flex-col md:w-1/3 w-2/3 h-36 mr-7 ml-auto mt-[15rem] font-semibold  rounded-xl bg-[#698da5e5]">
         <p className="ml-auto w-[66%] font-bold">
           با جدیدترین مجموعه محصولات ما آشنا شوید
         </p>
