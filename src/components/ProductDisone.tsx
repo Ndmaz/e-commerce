@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Button } from "./ui/button";
 import { usePPD } from "@/store/usePPD";
 import { IoIosArrowDropleft } from "react-icons/io";
@@ -10,12 +10,18 @@ import useEmblaCarousel from "embla-carousel-react";
 import { toast } from "@/store/use-toast";
 
 export default function ProductDisone() {
-  const [emblamainref, emblamainapi] = useEmblaCarousel({ loop: true });
+  const [emblamainref, emblamainapi] = useEmblaCarousel();
   const [emblathumbref, emblathumbapi] = useEmblaCarousel();
   const productinfo = usePPD((state) => state.productinfo);
   const productchange = useCartproducts((state) => state.productschange);
   const products = useCartproducts((state) => state.products);
- 
+
+ const bigcarouselnext=useCallback(()=>{
+if(emblamainapi) emblamainapi.canScrollNext
+ },[emblamainapi])
+ const bigcarouselprev=useCallback(()=>{
+  if(emblamainapi) emblamainapi.canScrollPrev
+   },[emblamainapi])
   const imagess = JSON.parse(productinfo.images);
   const imagesss =
     productinfo.images == `{"pic1":"","pic2":"","pic3":"","pic4":""}`
@@ -48,6 +54,8 @@ export default function ProductDisone() {
               );
             })}
           </div>
+          <div className="absolute" onClick={bigcarouselnext}>next</div>
+          <div className="absolute  bg-white" onClick={bigcarouselprev}>prev</div>
         </div>
         <div className="overflow-hidden" ref={emblathumbref}>
           <div className="flex space-x-1">
@@ -86,6 +94,9 @@ export default function ProductDisone() {
                 return;
               }
               productchange([...products, productinfo]);
+              const strigified=JSON.stringify([...products,productinfo])
+              localStorage.setItem('cartproducts',strigified)
+              
               toast({
                 title: "سبد خرید:",
                 description: "محصول با موفقیت اضافه شد",

@@ -8,6 +8,7 @@ import Cartsidebar from "./Cartsidebar";
 import { IoSearchOutline } from "react-icons/io5";
 import Searchsidebar from "./Searchsidebar";
 import { useCartproducts } from "@/store/useCartproducts";
+import { useEffect, useState } from "react";
 
 function Header() {
   const searchboolean = useHeaders((state) => state.searchboolean);
@@ -19,6 +20,16 @@ function Header() {
     (state) => state.profilebooleanchange
   );
   const products = useCartproducts((state) => state.products);
+  const productschange = useCartproducts((state) => state.productschange);
+  
+  useEffect(() => {
+    const localcart = localStorage.getItem("cartproducts");
+    //if there is no data in the cart then it shouldnt parse it
+    if (localcart) {
+      const parsed = JSON.parse(localcart);
+      productschange(parsed);
+    }
+  }, [productschange]);
 
   return (
     <header className="flex z-10 fixed  w-full h-[5rem] top-0 justify-between bg-slate-300">
@@ -32,7 +43,7 @@ function Header() {
           className="hidden md:block text-2xl cursor-pointer"
           onClick={() => cartbooleanchange(true)}
         />
-        <p className={`${(products.length==0)?'hidden':'hidden md:block'} absolute bg-red-400 text-white rounded-2xl px-1`}>{products.length}</p>
+        <p className={`${(products?.length==0)?'hidden':'hidden md:block'} absolute bg-red-400 text-white rounded-2xl px-1`}>{products?.length}</p>
         </div>
        
 
