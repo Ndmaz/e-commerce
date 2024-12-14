@@ -1,12 +1,16 @@
 import { create } from "zustand";
 
-type Cartprodutsvalues={
-    products:Array<object>
+type Cartprodutsvalues = {
+    products: Array<object>
+    order: object
 }
-type Cartprodutsfunction={
-    productschange:(by:Array<object>)=>void
+type Cartprodutsfunction = {
+    productschange: (by: Array<object>) => void
+    orderchange: (ty: object) => void
 }
-export const useCartproducts=create<Cartprodutsvalues&Cartprodutsfunction>((set)=>({
-products:[],
-productschange:(by)=>(set(()=>({products:by})))
+export const useCartproducts = create<Cartprodutsvalues & Cartprodutsfunction>((set) => ({
+    order: {},
+    products: [],
+    productschange: (by) => (set(() => ({ products: by }))),
+    orderchange: (ty) => (set(() => ({ order: ty })))
 }))

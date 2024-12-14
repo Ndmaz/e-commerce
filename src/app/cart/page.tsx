@@ -1,41 +1,61 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+
 import { useCartproducts } from "@/store/useCartproducts";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import { useEffect, useState } from "react";
+import { CiSquareMinus, CiSquarePlus } from "react-icons/ci";
 
 export default function Cart() {
   const productchange = useCartproducts((state) => state.productschange);
   const products = useCartproducts((state) => state.products);
-  // Create a state object to keep track of individual quantities for each product
   const [quantity, setQuantity] = useState<{ [key: string]: number }>({});
-  
+  const [totalp, settotalp] = useState();
+
   useEffect(() => {
     const localcart = localStorage.getItem("cartproducts");
-    //if there is no data in the cart then it shouldnt parse it
+
     if (localcart) {
       const parsed = JSON.parse(localcart);
       productchange(parsed);
+      settotalp(() => {
+        return parsed.reduce((acumulater, product) => {
+          return acumulater + product.price;
+        }, 0);
+      });
     }
   }, [productchange]);
 
-  // Function to handle quantity change for a specific product
   const updateQuantity = (productId: string, newQuantity: number) => {
     setQuantity((prevQuantity) => ({
       ...prevQuantity,
       [productId]: newQuantity,
     }));
+    settotalp(() => {
+      return products.reduce((acumulator, product) => {
+        if (productId == product.id) {
+          const qunityprice = newQuantity * product.price;
+
+          return acumulator + qunityprice;
+        }
+        const currentquanity = quantity[product.id] || 1;
+        const qunaityprice = product.price * currentquanity;
+
+        return acumulator + qunaityprice;
+      }, 0);
+    });
   };
 
-  const router = useRouter();
   return (
-    <div className="bg-white w-[75vw] mx-auto rounded-lg p-2" dir="rtl">
+    <div
+      className="bg-white overflow-x-auto  md:w-[75vw] md:mx-auto md:rounded-lg p-2"
+      dir="rtl"
+    >
       <div>
         <div>محصولات منتخب:</div>
-    
-        <table className="mx-auto ">
+
+        <table className="mx-auto  ">
           <thead>
             <tr className=" space-x-6 ">
               <td className="border-black border-y-[1px] p-2">اسم محصول</td>
@@ -44,47 +64,61 @@ export default function Cart() {
               <td className="border-black border-y-[1px] p-2">--</td>
             </tr>
           </thead>
-          <tbody className="" >
-            { products?.map((product) => {
+          <tbody className="">
+            {products?.map((product, index) => {
               const currentQuantity = quantity[product.id] || 1;
+              const qunaityprice = product.price * currentQuantity;
 
               return (
                 <tr key={product.id} className="">
                   <td className="p-2 border-l-gray-300 border-b-black border-l-[1px] border-b-[1px]">
                     {product.productname}
                   </td>
-                  <td className="p-2 border-l-gray-300 border-b-black border-l-[1px] border-b-[1px]">
+                  <td className="p-2 pb-3 flex border-l-gray-300 border-b-black border-l-[1px] border-b-[1px]">
+                    <CiSquarePlus
+                      className="text-2xl ml-2 cursor-pointer"
+                      onClick={() =>
+                        updateQuantity(product.id, currentQuantity + 1)
+                      }
+                    />
                     <input
-                      type="number"
+                      type="text"
                       value={currentQuantity}
                       onChange={(e) =>
                         updateQuantity(product.id, parseInt(e.target.value))
                       }
                     />
+                    <CiSquareMinus
+                      className="text-xl mr-2 cursor-pointer"
+                      onClick={() =>
+                        updateQuantity(product.id, currentQuantity - 1)
+                      }
+                    />
                   </td>
                   <td className="p-2 border-l-gray-300 border-b-black border-l-[1px] border-b-[1px]">
-                    {product.price}
+                    {qunaityprice}
                   </td>
                   <td
                     className="p-2 border-l-gray-300 border-b-black border-l-[1px] border-b-[1px] bg-red-200 cursor-pointer"
-                    onClick={() => {}}
+                    onClick={() => {
+                      const spliced = products.toSpliced(index);
+                      productchange(spliced);
+                      const stringified = JSON.stringify(spliced);
+                      localStorage.setItem("cartproducts", stringified);
+                    }}
                   >
                     حذف از لیست
                   </td>
                 </tr>
               );
             })}
+            <tr>
+              <td>قیمت کل</td>
+              <td>{totalp}</td>
+            </tr>
           </tbody>
         </table>
-        <Button
-        
-          onClick={() => {
-            router.push("/cart/step2");
-            
-          }}
-        >
-          تایید سفارش
-        </Button>
+        <Link href="/cart/step2"> مرحله بعد</Link>
       </div>
     </div>
   );
