@@ -1,17 +1,37 @@
 "use client";
 
-
+import { Button } from "@/components/ui/button";
 import { useCartproducts } from "@/store/useCartproducts";
 import Link from "next/link";
+import React from "react";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CiSquareMinus, CiSquarePlus } from "react-icons/ci";
+import { FaArrowRight } from "react-icons/fa";
 
 export default function Cart() {
   const productchange = useCartproducts((state) => state.productschange);
   const products = useCartproducts((state) => state.products);
-  const [quantity, setQuantity] = useState<{ [key: string]: number }>({});
-  const [totalp, settotalp] = useState();
+  const order = useCartproducts((state) => state.order);
+  const orderchange = useCartproducts((state) => state.orderchange);
+  const prviousquantity = useMemo(() => {
+    let quantityresult = {};
+    for (let product in products) {
+      if (product.quantitytotake) {
+        quantityresult = {
+          ...quantityresult,
+          [product.id]: product.quantitytotake,
+        }
+      } else {
+        quantityresult = { ...quantityresult, [product.id]: 1 };
+      }
+    }
+    console.log(quantityresult);
+    return quantityresult;
+  }, [products]);
+
+  const [quantity, setQuantity] = useState<{ [key: string]: number }>(prviousquantity);
+  const [totalprice, settotalprice] = useState(0);
 
   useEffect(() => {
     const localcart = localStorage.getItem("cartproducts");
@@ -19,7 +39,7 @@ export default function Cart() {
     if (localcart) {
       const parsed = JSON.parse(localcart);
       productchange(parsed);
-      settotalp(() => {
+      settotalprice(() => {
         return parsed.reduce((acumulater, product) => {
           return acumulater + product.price;
         }, 0);
@@ -32,7 +52,7 @@ export default function Cart() {
       ...prevQuantity,
       [productId]: newQuantity,
     }));
-    settotalp(() => {
+    settotalprice(() => {
       return products.reduce((acumulator, product) => {
         if (productId == product.id) {
           const qunityprice = newQuantity * product.price;
@@ -74,26 +94,22 @@ export default function Cart() {
                   <td className="p-2 border-l-gray-300 border-b-black border-l-[1px] border-b-[1px]">
                     {product.productname}
                   </td>
-                  <td className="p-2 pb-3 flex border-l-gray-300 border-b-black border-l-[1px] border-b-[1px]">
-                    <CiSquarePlus
-                      className="text-2xl ml-2 cursor-pointer"
-                      onClick={() =>
-                        updateQuantity(product.id, currentQuantity + 1)
-                      }
-                    />
-                    <input
-                      type="text"
-                      value={currentQuantity}
-                      onChange={(e) =>
-                        updateQuantity(product.id, parseInt(e.target.value))
-                      }
-                    />
-                    <CiSquareMinus
-                      className="text-xl mr-2 cursor-pointer"
-                      onClick={() =>
-                        updateQuantity(product.id, currentQuantity - 1)
-                      }
-                    />
+                  <td className="p-2 pb-3  border-l-gray-300 border-b-black border-l-[1px] border-b-[1px]">
+                    <div className="flex">
+                      <CiSquarePlus
+                        className="text-2xl ml-2 cursor-pointer"
+                        onClick={() =>
+                          updateQuantity(product.id, currentQuantity + 1)
+                        }
+                      />
+                      {currentQuantity}
+                      <CiSquareMinus
+                        className="text-xl mr-2 cursor-pointer"
+                        onClick={() =>
+                          updateQuantity(product.id, currentQuantity - 1)
+                        }
+                      />
+                    </div>
                   </td>
                   <td className="p-2 border-l-gray-300 border-b-black border-l-[1px] border-b-[1px]">
                     {qunaityprice}
@@ -114,11 +130,34 @@ export default function Cart() {
             })}
             <tr>
               <td>قیمت کل</td>
-              <td>{totalp}</td>
+              <td>{totalprice}</td>
             </tr>
           </tbody>
         </table>
-        <Link href="/cart/step2"> مرحله بعد</Link>
+        <div className="w-1/2 mx-auto ">
+          <Button
+            className="w-full"
+            onClick={() => {
+              const newproducts = products.map((product) => {
+                return {
+                  ...product,
+                  quantitytotake: quantity[product.id] || 1,
+                  totalprice,
+                };
+              });
+           
+              orderchange({productstobuy:newproducts})
+
+            }}
+          >
+            تائید
+          </Button>
+        </div>
+        <Link className="font-bold flex-col" href="/cart/step2">
+
+          <p>مرحله بعد </p>
+          <FaArrowRight className="text-blue-500 " />
+        </Link>
       </div>
     </div>
   );

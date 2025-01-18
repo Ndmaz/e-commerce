@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import StickyFooter from "@/components/StickyFooter";
 import Providers from "@/components/Providers";
 import { Toaster } from "@/components/ui/toaster";
+import Footer from "@/components/Footer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -26,6 +27,7 @@ export default function RootLayout({
 
           <main className=" mt-[5rem] sticky mb-[10rem] min-h-screen  top-[5rem] md:h-[100vh]  ">
             {children}
+            <Footer/>
             <Toaster />
           </main>
 

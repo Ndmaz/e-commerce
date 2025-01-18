@@ -6,6 +6,7 @@ import { useCartproducts } from "@/store/useCartproducts";
 import Link from "next/link";
 import React, { useState } from "react";
 import { z } from "zod";
+import { FaArrowLeft } from "react-icons/fa"
 export default function Step2() {
   const order = useCartproducts((state) => state.order);
   const orderchange = useCartproducts((state) => state.orderchange);
@@ -45,7 +46,7 @@ export default function Step2() {
       setErrors(fieldErrors);
     } else {
       setErrors({});
-      orderchange({...order,...formData})
+      orderchange({...order,userinfo:formData})
       setdisableboolean(true)
     }
   };
@@ -54,6 +55,13 @@ export default function Step2() {
       className="flex flex-col bg-white md:w-2/3 mx-auto md:shadow-md md:rounded-md p-2 md:mt-6"
       dir="rtl"
     >
+      <Link href='/cart' className="flex font-bold mr-auto hover:shadow-md rounded-md p-1" dir="">
+        برگشت
+      <FaArrowLeft className="mr-1 text-red-300"/>
+    
+
+      </Link>
+      
       <h1 className="text-xl font-bold m-4">
         آدرس و راه های ارتباطی خود را وارد کنید:
       </h1>

@@ -8,7 +8,7 @@ export default async function Panellayout ({children}:{children:React.ReactNode}
 
     const session=await getServerSession(authOptions)
    if(/*session?.user.role==='ADMIN'*/ true){
-    return <div className='flex justify-center ' >
+    return <div className='flex justify-center h-screen' >
         <Link href='/adminpanel' className='font-bold text-lg bg-white inline-block mt-6 p-4 rounded-md'>برای رفتن به پنل ادمین کلیک کنید</Link>
     </div>
    }
