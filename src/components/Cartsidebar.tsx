@@ -5,21 +5,14 @@ import Link from "next/link";
 import { BsCartDash, BsCartX } from "react-icons/bs";
 import Image from "next/image";
 import pic from "@/app/1.jpg";
-import { useEffect, useState } from "react";
+
 
 export default function Cartsidebar() {
   const cartbooleanchange = useHeaders((state) => state.cartbooleanchange);
   const products = useCartproducts((state) => state.products);
   const productschange = useCartproducts((state) => state.productschange);
   
-  useEffect(() => {
-    const localcart = localStorage.getItem("cartproducts");
-    //if there is no data in the cart then it shouldnt parse it
-    if (localcart) {
-      const parsed = JSON.parse(localcart);
-      productschange(parsed);
-    }
-  }, [productschange]);
+  
 
   return (<div className="w-full absolute flex">
     <div className=" bg-white w-1/3 h-[100vh] rounded-br-xl z-10 opacity-90">
@@ -31,7 +24,7 @@ export default function Cartsidebar() {
         <Link href="/cart" className="ml-auto font-bold shadow-md p-1 rounded-sm">رفتن به صفحه خرید</Link>
       </div>
       <div dir="rtl">
-        {products.map((item) => {
+        {products.map((item,index) => {
           const imagess = JSON.parse(item.images);
           const imagesss =
             item.images == `{"pic1":"","pic2":"","pic3":"","pic4":""}`
@@ -54,7 +47,12 @@ export default function Cartsidebar() {
                 <p>{item.productname}</p>
                 <p className="mr-2 mt-4">قیمت:{item.price}</p>
               </div>
-              <BsCartDash className="text-red-500 text-xl mt-auto mb-2 " onClick={()=>productschange} />
+              <BsCartDash className="text-red-500 text-xl mt-auto mb-2 cursor-pointer " onClick={()=>{
+                const spliced = products.filter((iteme) => iteme.id !== item.id)
+                productschange(spliced);
+                const stringified = JSON.stringify(spliced);
+                localStorage.setItem("cartproducts", stringified);
+              }} />
             </div>
           );
         })}
@@ -62,7 +60,7 @@ export default function Cartsidebar() {
       
     </div>
     <div className="w-2/3 min-h-screen opacity-40 cursor-pointer bg-black" onClick={() => cartbooleanchange(false)}>
-dd
+
     </div >
     </div>
   );

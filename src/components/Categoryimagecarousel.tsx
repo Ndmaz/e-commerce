@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useAGetcategories } from "@/store/AsyncStore/useAGetcategories";
-
+import { MdKeyboardDoubleArrowLeft, MdKeyboardDoubleArrowRight } from "react-icons/md";
 import Link from "next/link";
 
 import useEmblaCarousel from "embla-carousel-react";
@@ -49,8 +49,8 @@ export default function Categoryimagecarousel() {
               );
             })}
           </div>
-          <div className="absolute right-0 top-1/2" onClick={scrollNext}>next</div>
-          <div className="absolute  top-1/2" onClick={scrollPrev}>perv</div>
+          <div className="absolute right-0 top-1/2" onClick={scrollNext}><MdKeyboardDoubleArrowRight /></div>
+          <div className="absolute  top-1/2" onClick={scrollPrev}><MdKeyboardDoubleArrowLeft /></div>
         </div>
       </div>
   )

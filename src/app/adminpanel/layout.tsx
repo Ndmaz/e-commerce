@@ -15,22 +15,28 @@ export default async function Adminlayout({
   return (
     <div className="h-full flex flex-row-reverse ">
       <div
-        className="w-[25vw] bg-slate-400 h-full flex flex-col items-center space-y-8 font-semibold text-xs md:text-sm rounded-l-lg"
+        className="w-[25vw] border-t-2 border-slate-500 bg-slate-300 flex flex-col items-center space-y-8 font-semibold text-xs md:text-sm "
         dir="rtl"
       >
         <h1 className="mx-auto mt-2">پنل کاربری</h1>
-        <div className="w-full">
+        <div className="w-full  bg-slate-300">
           <div className=" my-4  ">
             <p>مدیریت صفحه اصلی</p>
             <div className="flex flex-col items-center space-y-2  ">
+            <Link
+                className="bg-[rgb(162,190,163)] hover:bg-slate-300  hover:border-black border-2 rounded-lg py-3 px-2 w-full"
+                href="/adminpanel/Mainpageimage"
+              >
+                 عکس زمینه 
+              </Link>
               <Link
-                className="bg-[rgb(162,190,163)] hover:bg-slate-300 rounded-lg py-3 px-2 w-full"
+                className="bg-[rgb(162,190,163)] hover:bg-[rgb(190,212,191)] hover:border-black border-2 rounded-lg py-3 px-2 w-full"
                 href="/adminpanel/Categoryfilter"
               >
                 تغییرات دسته بندی
               </Link>
               <Link
-                className="bg-[rgb(162,190,163)] hover:bg-slate-300 rounded-lg py-3 px-2 w-full"
+                className="bg-[rgb(162,190,163)] hover:bg-[rgb(190,212,191)] hover:border-black border-2 rounded-lg py-3 px-2 w-full"
                 href="/adminpanel/Brandfilter"
               >
                 تغییرات برند
@@ -41,19 +47,19 @@ export default async function Adminlayout({
             <p>مدیریت محصولات</p>
             <div className="flex flex-col items-center space-y-2  ">
               <Link
-                className="bg-[rgb(162,190,163)] hover:bg-slate-300 rounded-lg py-3 px-2 w-full"
+                className="bg-[rgb(162,190,163)] hover:bg-[rgb(190,212,191)] hover:border-black border-2 rounded-lg py-3 px-2 w-full"
                 href="/adminpanel/ProductRegestry"
               >
                 ثبت محصولات
               </Link>
               <Link
-                className="bg-[rgb(162,190,163)] hover:bg-slate-300 rounded-lg py-3 px-2 w-full"
+                className="bg-[rgb(162,190,163)] hover:bg-[rgb(190,212,191)] hover:border-black border-2 rounded-lg py-3 px-2 w-full"
                 href="/adminpanel/ProductEditing"
               >
                 ویرایش محصولات
               </Link>
               <Link
-                className="bg-[rgb(162,190,163)] hover:bg-slate-300 rounded-lg py-3 px-2 w-full"
+                className="bg-[rgb(162,190,163)] hover:bg-[rgb(190,212,191)] hover:border-black border-2 rounded-lg py-3 px-2 w-full"
                 href="/adminpanel/ProductRemoving"
               >
                 حذف محصولات
@@ -64,13 +70,13 @@ export default async function Adminlayout({
             <p> مدیریت سفارشات </p>
             <div className="flex flex-col  space-y-2">
               <Link
-                className="bg-[rgb(162,190,163)] hover:bg-slate-300 rounded-lg py-3 px-2 w-full"
+                className="bg-[rgb(162,190,163)] hover:bg-[rgb(190,212,191)] hover:border-black border-2 rounded-lg py-3 px-2 w-full"
                 href="/adminpanel/NewOrder"
               >
                 سفارشات تازه
               </Link>
               <Link
-                className="bg-[rgb(162,190,163)] hover:bg-slate-300 rounded-lg py-3 px-2 w-full"
+                className="bg-[rgb(162,190,163)] hover:bg-[rgb(190,212,191)] hover:border-black border-2 rounded-lg py-3 px-2 w-full"
                 href="/adminpanel/NewOrder"
               >
                 سفارشات گذشته

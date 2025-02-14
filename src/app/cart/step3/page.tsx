@@ -44,8 +44,8 @@ export default function Step3() {
           })}
           <tr>
             <td>قیمت کل</td>
-            {(order.productstobuy[1].totalprice<100000)&&<td>به اضافه 13000 هزینه پست:</td> } 
-            <td>{(order.productstobuy[1].totalprice>100000)?order.productstobuy[1].totalprice:order.productstobuy[1].totalprice+13000}</td>
+            {(order.productstobuy[0].totalprice<100000)&&<td>به اضافه 13000 هزینه پست:</td> } 
+            <td>{(order.productstobuy[0].totalprice>100000)?order.productstobuy[0].totalprice:order.productstobuy[0].totalprice+13000}</td>
             
           </tr>
 

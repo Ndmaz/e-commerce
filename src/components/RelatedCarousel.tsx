@@ -45,6 +45,7 @@ if (isLoading){
       </div>
     );
   });
+  if (maped)
   return (
     <div dir="rtl" className=" md:w-[95vw] rounded-sm md:mx-auto p-1 mb-20">
       <p >محصولات مرتبط</p>

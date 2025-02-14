@@ -3,9 +3,9 @@
 import { Button } from "@/components/ui/button";
 import { useCartproducts } from "@/store/useCartproducts";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { CiSquareMinus, CiSquarePlus } from "react-icons/ci";
 import { FaArrowRight } from "react-icons/fa";
 
@@ -14,6 +14,9 @@ export default function Cart() {
   const products = useCartproducts((state) => state.products);
   const order = useCartproducts((state) => state.order);
   const orderchange = useCartproducts((state) => state.orderchange);
+  const [nextpagetoggle, setnextpagetoggle] = useState(false)
+  const [error,seterror] = useState('')
+  
   const prviousquantity = useMemo(() => {
     let quantityresult = {};
     for (let product in products) {
@@ -31,21 +34,15 @@ export default function Cart() {
   }, [products]);
 
   const [quantity, setQuantity] = useState<{ [key: string]: number }>(prviousquantity);
-  const [totalprice, settotalprice] = useState(0);
 
-  useEffect(() => {
-    const localcart = localStorage.getItem("cartproducts");
+  const [totalprice, settotalprice] = useState(() => {
 
-    if (localcart) {
-      const parsed = JSON.parse(localcart);
-      productchange(parsed);
-      settotalprice(() => {
-        return parsed.reduce((acumulater, product) => {
-          return acumulater + product.price;
-        }, 0);
-      });
-    }
-  }, [productchange]);
+    return products.reduce((acumulater, product) => {
+      return acumulater + product.price
+       
+    }, 0);
+  });
+
 
   const updateQuantity = (productId: string, newQuantity: number) => {
     setQuantity((prevQuantity) => ({
@@ -117,7 +114,7 @@ export default function Cart() {
                   <td
                     className="p-2 border-l-gray-300 border-b-black border-l-[1px] border-b-[1px] bg-red-200 cursor-pointer"
                     onClick={() => {
-                      const spliced = products.toSpliced(index);
+                      const spliced = products.filter((item) => item.id !== product.id)
                       productchange(spliced);
                       const stringified = JSON.stringify(spliced);
                       localStorage.setItem("cartproducts", stringified);
@@ -138,6 +135,10 @@ export default function Cart() {
           <Button
             className="w-full"
             onClick={() => {
+              if(products.length==0){
+                seterror('محصولی انتخاب نشده')
+                return
+              }
               const newproducts = products.map((product) => {
                 return {
                   ...product,
@@ -145,19 +146,23 @@ export default function Cart() {
                   totalprice,
                 };
               });
-           
-              orderchange({productstobuy:newproducts})
-
+                
+              orderchange({ productstobuy: newproducts })
+              setnextpagetoggle(true)
             }}
           >
             تائید
           </Button>
         </div>
-        <Link className="font-bold flex-col" href="/cart/step2">
+        {error}
+        {
+          nextpagetoggle && <Link className="font-bold flex-col" href="/cart/step2">
 
-          <p>مرحله بعد </p>
-          <FaArrowRight className="text-blue-500 " />
-        </Link>
+            <p>مرحله بعد </p>
+            <FaArrowRight className="text-blue-500 " />
+          </Link>
+        }
+
       </div>
     </div>
   );

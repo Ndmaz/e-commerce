@@ -20,16 +20,27 @@ function Header() {
     (state) => state.profilebooleanchange
   );
   const products = useCartproducts((state) => state.products);
-  const productschange = useCartproducts((state) => state.productschange);
+  const productchange = useCartproducts((state) => state.productschange);
   
   useEffect(() => {
-    const localcart = localStorage.getItem("cartproducts");
-    //if there is no data in the cart then it shouldnt parse it
-    if (localcart) {
-      const parsed = JSON.parse(localcart);
-      productschange(parsed);
-    }
-  }, [productschange]);
+      const storedProducts = localStorage.getItem("cartproducts");
+      if (storedProducts) {
+        productchange(JSON.parse(storedProducts));
+      }
+  
+      const handleFocus = () => {
+        const storedProducts = localStorage.getItem("cartproducts");
+        if (storedProducts) {
+          productchange(JSON.parse(storedProducts));
+        }
+      };
+  
+      window.addEventListener("focus", handleFocus);
+  
+      return () => {
+        window.removeEventListener("focus", handleFocus);
+      };
+    }, [productchange]);
 
   return (
     <header className="flex z-10 fixed  w-full h-[5rem] top-0 justify-between bg-slate-300">
@@ -37,7 +48,7 @@ function Header() {
       {searchboolean && <Searchsidebar />}
       {}
       {/* */}
-      <div className="flex my-auto ml-8 justify-between w-[8rem] relative">
+      <div className="flex my-auto ml-8 justify-between w-[8rem] relative" >
        <div> 
         <LuShoppingCart
           className="hidden md:block text-2xl cursor-pointer"
