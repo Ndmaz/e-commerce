@@ -1,138 +1,104 @@
 import prisma from "@/lib/database";
+import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 
+// Type definitions for request parameters
+interface PriceRange {
+    price1: number;  // Minimum price
+    price2: number;  // Maximum price
+}
 
+interface RequestBody {
+    page: number;     // Current page number for pagination
+    price: PriceRange;// Price range filter
+    category: string; // Category ID filter
+    brand: string;    // Brand ID filter
+    searchprop?: string; // Optional search term
+}
 
-
-
-//each page takes 12, inital take runs first then filters get applied
+// API endpoint for fetching products with filters and pagination
+// Each page contains 12 products
 export async function POST(req: Request) {
-
-
-    const { page, price, category } = await req.json()
-
-    //no filter initial call
-    const empty = {}
-    const initialpricefilter = (price == empty)
-    const initialcategoryfilter = (category == '')
-    //transforming the variable into database query ready variables
-    const pricerange = {
-        price1: parseFloat(price.price1)*1000,
-        price2: parseFloat(price.price2)*1000
-
-    }
-    const categoryid = parseFloat(category)
-
-    //laterfilter
-    const exampleemptyprice = {
-        price1: 0, price2: 100000000000000
-    }
-
-    const secondarypricefilter = (price.price1 == exampleemptyprice.price1) && (price.price2 == exampleemptyprice.price2)
-
-    const secondarycategoryfilter = (category == '')
-    //page pagintaion
-    const startrange = page * 12 - 12
-
     try {
-        //initial query with no filters and just changes around pages
-        if (initialpricefilter && initialcategoryfilter) {
-            const products = await prisma.product.findMany({
-                skip: startrange,
-                take: 12,
-                include: {
-                    category: true,
-                }
-            })
-
-            return NextResponse.json({ products })
+        // Parse request body with default values for initial request
+        const body = await req.json();
+        const {
+            page,
+            price,
+            category,
+            brand,
+            searchprop
+        } = body;
+console.log('this is searchprop',searchprop)
+        // Validate page number
+        if (page < 1) {
+            return NextResponse.json(
+                { error: "Invalid page number" },
+                { status: 400 }
+            );
         }
-        //price only filter when price is sent but the category isnt sent
-        if (secondarycategoryfilter) {
-            const products = await prisma.product.findMany({
-                skip: startrange,
-                take: 12,
-                where: {
-                    AND: [
-                        {
-                            price: {
-                                gt: pricerange.price1
 
-                            }
-                        },
-                        {
-                            price: {
-                                lt: pricerange.price2
-                            }
-                        }
-                    ]
-                },
-                include: {
-                    category: true
+        // Calculate pagination offset
+        const startRange = (page - 1) * 12;
 
+        // Initialize where clause for Prisma query
+        const where: Prisma.ProductWhereInput = {};
 
-                }
-            })
-            return NextResponse.json({ products })
-        }
-        //only category, when price is not set and sent
-        if (secondarypricefilter) {
+        // Check which filters are active
+        const pricefilterboolean = price && (price.price1 !== 0 || price.price2 !== 1000);
+        const categoryfilterboolean = category !== '';
+        const brandfilterboolean = brand !== '';
+        const searchpropfilterboolean = searchprop!== '';
 
-            const products = await prisma.product.findMany({
-                skip: startrange,
-                take: 12,
-                where: {
-                    categoryid: categoryid
-                },
-                include: {
-                    category: true
-                }
-            })
-
-            return NextResponse.json({ products })
-        }
-        // default if both category and price is set 
-        const products = await prisma.product.findMany({
-            skip: startrange,
-            take: 12,
-            where: {
-                AND: [
-                    {
-                        categoryid: categoryid
-
-                    }
-                    ,
-                    {
-                        AND: [
-                            {
-                                price: {
-                                    gt: pricerange.price1
-
-                                }
-                            },
-                            {
-                                price: {
-                                    lt: pricerange.price2
-                                }
-                            }
-                        ]
-                    }
-                ]
-
-
-            },
-            include: {
-                category: true
+        // Construct where clause based on active filters
+        const wherecunstructor = () => {
+            // Add price range filter if active
+             // Add search filter if active (case-insensitive)
+            if (searchpropfilterboolean) {
+                where.productname = {
+                    contains: searchprop,
+                    mode: 'insensitive'
+                };
             }
-        })
+            if (pricefilterboolean) {
+                where.price = {
+                    gte: price.price1 * 1000, // Convert to actual price (×1000)
+                    lte: price.price2 * 1000
+                }
+            }
+            // Add category filter if active
+            if (categoryfilterboolean) {
+                where.categoryid = parseFloat(category);
+            }
+            // Add brand filter if active
+            if (brandfilterboolean) {
+                where.brandid = parseFloat(brand);
+            }
+           
+            return where
+        }
 
-        return NextResponse.json({ products })
+        const wherecunstructorresult = wherecunstructor()
+        console.log(wherecunstructorresult)
+        // Execute Prisma query with constructed filters
+        const products = await prisma.product.findMany({
+            skip: startRange,    // Pagination offset
+            take: 12,           // Items per page
+            where: wherecunstructorresult, // Applied filters
+            include: {          // Include related data
+                category: true,
+                brand: true
+            },
+        });
 
+        // Return filtered products
+        return NextResponse.json({ products });
 
     } catch (error) {
-
-        console.log(error)
-        return new Response('error fetching', { status: 500 })
+        console.error('API Error:', error);
+        return NextResponse.json(
+            { error: "Failed to fetch products" },
+            { status: 500 }
+        );
     }
-
 }

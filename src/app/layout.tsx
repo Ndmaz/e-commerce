@@ -25,7 +25,7 @@ export default function RootLayout({
         <Providers>
           <Header />
 
-          <main className=" mt-[5rem] sticky mb-[10rem] min-h-screen  top-[5rem] md:h-[100vh]  ">
+          <main className=" mt-[5rem] sticky min-h-screen  top-[5rem] md:min-h-[100vh]  ">
             
             {children}
             <Footer/>

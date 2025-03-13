@@ -3,65 +3,112 @@ import { useCartproducts } from "@/store/useCartproducts";
 import { useHeaders } from "@/store/useheaders";
 import Link from "next/link";
 import { BsCartDash, BsCartX } from "react-icons/bs";
+import { IoCartOutline } from "react-icons/io5";
 import Image from "next/image";
 import pic from "@/app/1.jpg";
+import { useState, useEffect } from "react";
 
 
 export default function Cartsidebar() {
   const cartbooleanchange = useHeaders((state) => state.cartbooleanchange);
   const products = useCartproducts((state) => state.products);
   const productschange = useCartproducts((state) => state.productschange);
-  
-  
+  const [isOpen, setIsOpen] = useState(false);
 
-  return (<div className="w-full absolute flex">
-    <div className=" bg-white w-1/3 h-[100vh] rounded-br-xl z-10 opacity-90">
-      <div className="p-2 w-full flex justify-between">
-        <BsCartX
-          className="cursor-pointer text-xl"
-          onClick={() => cartbooleanchange(false)}
-        />
-        <Link href="/cart" className="ml-auto font-bold shadow-md p-1 rounded-sm">رفتن به صفحه خرید</Link>
-      </div>
-      <div dir="rtl">
-        {products.map((item,index) => {
-          const imagess = JSON.parse(item.images);
-          const imagesss =
-            item.images == `{"pic1":"","pic2":"","pic3":"","pic4":""}`
-              ? false
-              : imagess;
-          return (
-            <div
-              key={item.id}
-              className="px-4 my-2 flex justify-between border-y-2 border-slate-300 space-x-2 shadow-xl"
-            >
-              <div className="flex">
-                
-                <Image
-                  src={imagesss == false ? pic : imagesss.pic1}
-                  width={300}
-                  height={200}
-                  alt="dd"
-                  className="w-24 max-h-24 rounded-sm ml-1"
-                />
-                <p>{item.productname}</p>
-                <p className="mr-2 mt-4">قیمت:{item.price}</p>
-              </div>
-              <BsCartDash className="text-red-500 text-xl mt-auto mb-2 cursor-pointer " onClick={()=>{
-                const spliced = products.filter((iteme) => iteme.id !== item.id)
-                productschange(spliced);
-                const stringified = JSON.stringify(spliced);
-                localStorage.setItem("cartproducts", stringified);
-              }} />
+  const handleClose = () => {
+    setIsOpen(false);
+    setTimeout(() => cartbooleanchange(false), 300);
+  };
+
+  const handleRemoveItem = (itemId: string) => {
+    const updatedProducts = products.filter(item => item.id !== itemId);
+    productschange(updatedProducts);
+    localStorage.setItem("cartproducts", JSON.stringify(updatedProducts));
+  };
+
+  useEffect(() => {
+    setIsOpen(true);
+    return () => setIsOpen(false);
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-50 flex">
+      {/* Overlay */}
+      <div
+        className={`fixed inset-0 bg-black/60 transition-opacity duration-300 
+                   ${isOpen ? 'opacity-100' : 'opacity-0'}`}
+        onClick={handleClose}
+      />
+
+      {/* Cart Sidebar */}
+      <div
+        className={`relative w-full md:w-[400px] bg-white h-screen shadow-2xl transform transition-transform duration-300 
+                   ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+      >
+        {/* Header */}
+        <div className="p-4 border-b flex items-center justify-between bg-white sticky top-0 z-10">
+          <Link
+            href="/cart"
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 
+                     transition-colors duration-200 active:scale-95 text-sm font-medium"
+          >
+            رفتن به صفحه خرید
+          </Link>
+          <button
+            onClick={handleClose}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200 active:scale-95"
+          >
+            <BsCartX className="text-2xl text-gray-600" />
+          </button>
+        </div>
+
+        {/* Cart Items */}
+        <div className="overflow-y-auto h-[calc(100vh-4rem)]" dir="rtl">
+          {products.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-gray-500 space-y-4">
+              <IoCartOutline className="text-6xl" />
+              <p className="text-lg">سبد خرید شما خالی است</p>
             </div>
-          );
-        })}
-      </div>
-      
-    </div>
-    <div className="w-2/3 min-h-screen opacity-40 cursor-pointer bg-black" onClick={() => cartbooleanchange(false)}>
+          ) : (
+            products.map((item) => {
+              const images = JSON.parse(item.images);
+              const hasImages = item.images !== `{"pic1":"","pic2":"","pic3":"","pic4":""}`;
 
-    </div >
+              return (
+                <div
+                  key={item.id}
+                  className="p-4 border-b hover:bg-gray-50 transition-colors duration-200"
+                >
+                  <div className="flex items-start space-x-4 space-x-reverse">
+                    <Image
+                      src={hasImages ? images.pic1 : pic}
+                      width={300}
+                      height={200}
+                      alt={item.productname}
+                      className="w-24 h-24 object-cover rounded-lg"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-medium text-gray-900 truncate">
+                        {item.productname}
+                      </h3>
+                      <p className="mt-1 text-gray-500">
+                        قیمت: {new Intl.NumberFormat('fa-IR').format(item.price)} تومان
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleRemoveItem(item.id)}
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-full 
+                               transition-colors duration-200 active:scale-95"
+                    >
+                      <BsCartDash className="text-xl" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
     </div>
   );
 }

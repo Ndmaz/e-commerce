@@ -1,16 +1,12 @@
 import { useQuery } from "react-query";
-
-
-
-
-export const useAGetproducts = (page,price,category,flip) => {
+//flip is used for the filterss parameters to work
+export const useAGetproducts = (page, price, category, brand, searchprop?) => {
     async function queryfunction() {
         try {
-            const res = await fetch("http://localhost:3000/api/gettingproducts",{
-                method:'POST',
+            const res = await fetch("http://localhost:3000/api/gettingproducts", {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ page,price,category })
-
+                body: JSON.stringify({ page, price, category, brand, searchprop })
             });
             if (res.ok) {
                 const datas = await res.json();
@@ -18,9 +14,9 @@ export const useAGetproducts = (page,price,category,flip) => {
                 return products;
             }
         } catch (error) {
-            return error
+            return error;
         }
     }
-    return useQuery(['pages',page,flip], queryfunction)
+    return useQuery(['pages', page, category, brand, searchprop, price.price1, price.price2], queryfunction);
 }
 

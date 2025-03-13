@@ -3,61 +3,99 @@ import { usePPD } from "@/store/usePPD";
 import Image from "next/image";
 import pic from "@/app/1.jpg";
 import Link from "next/link";
-import { FaArrowsSpin } from "react-icons/fa6";
 import { CgSpinner } from "react-icons/cg";
 import { MdKeyboardDoubleArrowLeft } from "react-icons/md";
-export default function RelatedCarousel() {
-  const productinfo = usePPD((state) => state.productinfo);
-  const categoryid = productinfo.categoryid;
-  const issegment=true
-  const { data,isLoading } = useAPRELATED(categoryid,issegment);
-if (isLoading){
-  return  <div className="flex  w-full justify-center">
-  <CgSpinner strokeWidth="1" className="animate-spin text-5xl blur-sm" />
-</div>
+import { useparameters } from "@/store/useparameters";
+
+type ProductInfo = {
+  id: string;
+  productname: string;
+  price: number;
+  categoryid: string;
+  images: string;
 }
-  const maped = data?.map((product) => {
-    if(productinfo.productname==product.productname){
-      return
-    }
-    const imagess = JSON.parse(product.images);
-    const imagesss =
-      product.images == `{"pic1":"","pic2":"","pic3":"","pic4":""}`
-        ? false
-        : imagess;
+
+type RelatedProduct = {
+  id: string;
+  productname: string;
+  price: number;
+  images: string;
+}
+
+export default function RelatedCarousel() {
+  const productInfo = usePPD((state) => state.productinfo) as ProductInfo;
+  const { data, isLoading } = useAPRELATED(productInfo.categoryid, true);
+  const categorychange = useparameters((state) => state.categorychange)
+  if (isLoading) {
     return (
-      <div key={product.id} className="md:w-[15%] p-2 rounded-md h-50 focus:bg-[#caf0b1] hover:shadow-lg hover:bg-[#caf0b1]">
-        <Link href={`/products/${product.id}`}>
-          <div>
-            <Image
-              className="mx-auto rounded-sm h-40 "
-              width={200}
-              height={200}
-              src={imagesss == false ? pic : imagesss.pic1}
-              alt="rrr"
-            />
-          </div>
-          <div>
-            <p>{product.productname}</p>
-            <p>{product.price}</p>
-          </div>
-        </Link>
+      <div className="flex justify-center items-center py-8">
+        <CgSpinner className="animate-spin text-4xl text-blue-500" />
       </div>
     );
-  });
-  if (maped)
-  return (
-    <div dir="rtl" className=" md:w-[95vw] rounded-sm md:mx-auto p-1 mb-20">
-      <p >محصولات مرتبط</p>
+  }
 
-      <div className="  flex space-x-2 py-2 ">
-        {maped}
-        <Link href={'/'} className="flex my-auto hover:shadow-md   ">
-          <p className="text-xs ">ادامه محصولات</p>
-        <MdKeyboardDoubleArrowLeft  className="text-lg my-auto" />  
+  // Parse and validate images
+  const getProductImage = (imageString: string) => {
+    try {
+      const images = JSON.parse(imageString);
+      return images && images.pic1 ? images.pic1 : pic;
+    } catch {
+      return pic;
+    }
+  };
+
+  const relatedProducts = data?.products.filter(
+    product => product.productname !== productInfo.productname
+  ) ?? [];
+
+  if (!relatedProducts?.length) return null;
+
+  return (
+    <section className="max-w-7xl mx-auto px-4 py-12" dir="rtl">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">محصولات مرتبط</h2>
+        <Link
+          href="/products"
+          className="flex items-center gap-1 text-blue-600 hover:text-blue-700 
+                   transition-colors duration-200 group"
+          onClick={() => {
+            categorychange(productInfo.categoryid)
+          }}
+        >
+          <span className="text-sm font-medium">مشاهده همه</span>
+          <MdKeyboardDoubleArrowLeft className="text-xl group-hover:translate-x-[-4px] transition-transform" />
         </Link>
-        
       </div>
-    </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        {relatedProducts.map((product) => (
+          <Link
+            key={product.id}
+            href={`/products/${product.id}`}
+            className="group bg-white rounded-xl shadow-sm hover:shadow-md 
+                     transition-all duration-200 overflow-hidden"
+          >
+            <div className="aspect-square overflow-hidden bg-gray-100">
+              <Image
+                src={getProductImage(product.images)}
+                width={400}
+                height={400}
+                alt={product.productname}
+                className="w-full h-full object-cover group-hover:scale-105 
+                         transition-transform duration-300"
+              />
+            </div>
+            <div className="p-4">
+              <h3 className="font-medium text-gray-900 truncate">
+                {product.productname}
+              </h3>
+              <p className="mt-2 text-lg font-bold text-blue-600">
+                {new Intl.NumberFormat('fa-IR').format(product.price)} تومان
+              </p>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }

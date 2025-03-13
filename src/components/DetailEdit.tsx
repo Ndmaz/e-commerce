@@ -1,3 +1,5 @@
+"use client";
+
 import { usePE } from "@/store/usePE";
 import { useState } from "react";
 import { Input } from "./ui/input";
@@ -6,124 +8,213 @@ import { Button } from "./ui/button";
 import { useMutation } from "react-query";
 import { CgSpinner } from "react-icons/cg";
 import { CheckIcon } from "@radix-ui/react-icons";
+import { Product, ProductDetail } from "@/types/product";
+import { Card } from "./ui/card";
+
+interface DetailState {
+  name: string;
+  value: string;
+}
 
 export default function DetailEdit() {
-  const productinfo = usePE((state) => state.productsinfo);
- 
-
-    
-  const id = productinfo.id;
+  const productinfo = usePE((state) => state.productsinfo) as Product;
   const fieldname = usePE((state) => state.fieldname);
 
-  const details = JSON.parse(productinfo.details);
-  const [newdetails, setnewdetails] = useState(details);
-  const [detailcheck, setdetailcheck] = useState([details[0].detailname, 0]);
-  const [inputname, setinputname] = useState();
-  const [inputvalue, setinputvalue] = useState();
-  const [flipvalue, setflipvalue] = useState(false);
-  const [flipvalue2, setflipvalue2] = useState(false);
-  async function mutate() {
-    try {
-      const Editinput = newdetails;
+  // Initialize details state with proper type checking
+  const [details, setDetails] = useState<ProductDetail[]>(() => {
+    if (!productinfo.details) {
+      return [];
+    }
 
-      const res = await fetch("http://localhost:3000/api/PEmodifying", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ Editinput, id, fieldname }),
-      });
-      if (res.ok) {
-        return res.json();
-      }
-    } catch (error) {}
-  }
-  const mutation = useMutation(mutate);
-  const showdetails = details.map((item, index) => {
-    return (
-      <tr className=" " key={item.detailname}>
-        <th className=" p-2 border-2 border-black">{item.detailname}:</th>
-        <th className=" p-2 border-2 border-black ">{item.detailvalue}</th>
-        <th>
-          <input
-            type="radio"
-            value={item.detailname}
-            checked={detailcheck[0] == item.detailname}
-            onChange={(e) => {
-              setflipvalue(false);
-              setflipvalue2(false);
-              setdetailcheck([e.target.value, index]);
-            }}
-          />
-        </th>
-      </tr>
-    );
+    // If details is already an array, use it directly
+    if (Array.isArray(productinfo.details)) {
+      return productinfo.details;
+    }
+
+    // If it's a string, try to parse it
+    try {
+      return JSON.parse(productinfo.details);
+    } catch (e) {
+      console.error("Error parsing details:", e);
+      return [];
+    }
   });
 
+  const [selectedDetail, setSelectedDetail] = useState<{
+    index: number;
+    detail: ProductDetail;
+  } | null>(null);
+  const [editState, setEditState] = useState<DetailState>({
+    name: "",
+    value: "",
+  });
+  const [error, setError] = useState<string>("");
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch("/api/PEmodifying", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          Editinput: JSON.stringify(details), // Ensure details are stringified
+          id: productinfo.id,
+          fieldname,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("خطا در ثبت تغییرات");
+      }
+
+      return response.json();
+    },
+  });
+
+  const handleEdit = (detail: ProductDetail, index: number) => {
+    setSelectedDetail({ detail, index });
+    setEditState({
+      name: detail.detailname,
+      value: detail.detailvalue,
+    });
+  };
+
+  const handleUpdate = () => {
+    if (!selectedDetail) return;
+
+    if (!editState.name.trim() || !editState.value.trim()) {
+      setError("لطفا تمام فیلدها را پر کنید");
+      return;
+    }
+
+    const newDetails = [...details];
+    newDetails[selectedDetail.index] = {
+      detailname: editState.name,
+      detailvalue: editState.value,
+    };
+    setDetails(newDetails);
+    setSelectedDetail(null);
+    setEditState({ name: "", value: "" });
+    setError("");
+  };
+
+  const handleDelete = (index: number) => {
+    setDetails(prev => prev.filter((_, i) => i !== index));
+    if (selectedDetail?.index === index) {
+      setSelectedDetail(null);
+      setEditState({ name: "", value: "" });
+    }
+  };
+
   return (
-    <div>
-      <table>
-        <thead>
-          <tr>
-            <th>مشخصه</th>
-            <th>توصیف</th>
-          </tr>
-        </thead>
-        <tbody>{ showdetails}</tbody>
-      </table>
-      {detailcheck[0]}
+    <div className="space-y-6">
+      <Card className="p-6">
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold text-gray-900">مشخصات محصول</h2>
 
-      <div className="mr-2">
-        <Label>مشخصه</Label>
-        <Input
-          className="w-1/2"
-          type="text"
-          value={inputname}
-          onChange={(e) => setinputname(e.target.value)}
-        />
-        <Label>توصیف</Label>
-        <Input
-          className="w-1/2"
-          type="text"
-          value={inputvalue}
-          onChange={(e) => setinputvalue(e.target.value)}
-        />
-        {flipvalue && newdetails[detailcheck[1]].detailname}
-        <div className="flex space-x-4">
-          <Button
-            className="m-2"
-            onClick={() => {
-              const thedetailspliced = details.toSpliced(detailcheck[1], 1, {
-                detailname: inputname,
-                detailvalue: inputvalue,
-              });
-              setnewdetails(thedetailspliced);
-              setflipvalue(true);
-            }}
-          >
-            تغییر
-          </Button>
+          {/* Details Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-gray-50">
+                  <th className="p-3 text-right border">مشخصه</th>
+                  <th className="p-3 text-right border">مقدار</th>
+                  <th className="p-3 text-right border">عملیات</th>
+                </tr>
+              </thead>
+              <tbody>
+                {details.map((detail, index) => (
+                  <tr key={index} className="border-b hover:bg-gray-50">
+                    <td className="p-3 text-right border">{detail.detailname}</td>
+                    <td className="p-3 text-right border">{detail.detailvalue}</td>
+                    <td className="p-3 text-right border">
+                      <div className="flex gap-2 justify-end">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(detail, index)}
+                        >
+                          ویرایش
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-600 hover:text-red-700"
+                          onClick={() => handleDelete(index)}
+                        >
+                          حذف
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-          <Button
-            className="m-2"
-            onClick={() => {
-              setflipvalue(false);
-              const deletedeatil = details.toSpliced(detailcheck[1], 1);
-              setnewdetails(deletedeatil);
-              setflipvalue2(true);
-            }}
-            variant={"destructive"}
-          >
-            حذف{flipvalue2 && <CheckIcon className="text-green-600 " />}
-          </Button>
+          {/* Edit Form */}
+          {selectedDetail && (
+            <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+              <h3 className="font-medium text-gray-900">ویرایش مشخصه</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>نام مشخصه</Label>
+                  <Input
+                    value={editState.name}
+                    onChange={(e) => setEditState(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="نام مشخصه را وارد کنید"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>مقدار</Label>
+                  <Input
+                    value={editState.value}
+                    onChange={(e) => setEditState(prev => ({ ...prev, value: e.target.value }))}
+                    placeholder="مقدار را وارد کنید"
+                  />
+                </div>
+              </div>
+              {error && (
+                <p className="text-sm text-red-600">{error}</p>
+              )}
+              <div className="flex gap-2">
+                <Button onClick={handleUpdate}>
+                  ثبت تغییرات
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setSelectedDetail(null);
+                    setEditState({ name: "", value: "" });
+                    setError("");
+                  }}
+                >
+                  انصراف
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Submit Button */}
+          <div className="flex justify-end">
+            <Button
+              onClick={() => mutation.mutate()}
+              disabled={mutation.isLoading}
+            >
+              {mutation.isLoading ? (
+                <>
+                  <CgSpinner className="animate-spin ml-2" />
+                  در حال ثبت...
+                </>
+              ) : (
+                "ذخیره تغییرات"
+              )}
+              {mutation.isSuccess && (
+                <CheckIcon className="text-green-600 ml-2" />
+              )}
+            </Button>
+          </div>
         </div>
-      </div>
-
-      <Button onClick={mutation.mutate}>
-        ثبت تغییرات
-        {mutation.isLoading && (
-          <CgSpinner strokeWidth="1" className="animate-spin text-5xl" />
-        )}
-        {mutation.isSuccess && <CheckIcon className="text-green-600 " />}
-      </Button>
+      </Card>
     </div>
   );
 }

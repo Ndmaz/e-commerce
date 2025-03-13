@@ -4,54 +4,85 @@ import Image from "next/image";
 import { useAGetcategories } from "@/store/AsyncStore/useAGetcategories";
 import { MdKeyboardDoubleArrowLeft, MdKeyboardDoubleArrowRight } from "react-icons/md";
 import Link from "next/link";
-
 import useEmblaCarousel from "embla-carousel-react";
 import { useparameters } from "@/store/useparameters";
 import { useCallback } from "react";
+import { CgSpinner } from "react-icons/cg";
 
 export default function Categoryimagecarousel() {
-    const { data } = useAGetcategories();
-    const [emblacarouselRef,emblacarouselApi] = useEmblaCarousel({loop:true});
-    const categorychange = useparameters((state) => state.categorychange);
-    const scrollNext = useCallback(() => {
-      if (emblacarouselApi) emblacarouselApi.scrollNext()
-    }, [emblacarouselApi])
-    const scrollPrev = useCallback(() => {
-      if (emblacarouselApi) emblacarouselApi.scrollPrev()
-    }, [emblacarouselApi])
-  
+  const { data, isLoading } = useAGetcategories();
+  const [emblacarouselRef, emblacarouselApi] = useEmblaCarousel({
+    loop: true,
+    align: 'start',
+    slidesToScroll: 1
+  });
+
+  const categorychange = useparameters((state) => state.categorychange);
+
+  const scrollNext = useCallback(() => {
+    if (emblacarouselApi) emblacarouselApi.scrollNext();
+  }, [emblacarouselApi]);
+
+  const scrollPrev = useCallback(() => {
+    if (emblacarouselApi) emblacarouselApi.scrollPrev();
+  }, [emblacarouselApi]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <CgSpinner className="animate-spin text-4xl text-blue-500" />
+      </div>
+    );
+  }
+
+  if (!data?.length) return null;
+
   return (
-    <div className="flex flex-col mt-24 relative">
-        <p className="font-bold mx-auto my-4 ">
-          دسته بندی های مختلف محصولات را اینجا ببینید
-        </p>
-        <div className="flex overflow-hidden relative "ref={emblacarouselRef} >
-          <div className="flex mx-auto  space-x-4 " >
-            {data?.map((item) => {
-              return (
-                <Link
-                  className="hover:shadow-lg w-[15vw] flex-[0_0_30%] md:flex-[0_0_15%]"
-                  href="/products"
-                  onClick={() => {
-                    categorychange(item.id);
-                  }}
-                  key={item.id}
-                >
+    <div className="relative">
+      <div className="overflow-hidden" ref={emblacarouselRef}>
+        <div className="flex">
+          {data.map((item) => (
+            <Link
+              key={item.id}
+              href="/products"
+              onClick={() => categorychange(item.id)}
+              className="flex-[0_0_100%] md:flex-[0_0_33.33%] lg:flex-[0_0_25%] p-2 group"
+            >
+              <div className="relative overflow-hidden rounded-xl bg-white shadow-md hover:shadow-xl transition-all duration-300">
+                <div className="aspect-square relative overflow-hidden">
                   <Image
-                    className="h-[20rem] rounded-md  "
-                    width={200}
-                    height={200}
-                    alt="ss"
                     src={item.categoryimage}
+                    alt={item.name}
+                    fill
+                    className="object-cover transform group-hover:scale-105 transition-transform duration-300"
                   />
-                  {item.name}
-                </Link>
-              );
-            })}
-          </div>
-          <div className="absolute right-0 top-1/2" onClick={scrollNext}><MdKeyboardDoubleArrowRight /></div>
-          <div className="absolute  top-1/2" onClick={scrollPrev}><MdKeyboardDoubleArrowLeft /></div>
+                </div>
+                <div className="p-4 bg-white">
+                  <h3 className="text-lg font-medium text-gray-900">
+                    {item.name}
+                  </h3>
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
-  )
+
+      {/* Navigation Buttons */}
+      <button
+        onClick={scrollPrev}
+        className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/80 
+                 hover:bg-white shadow-md transition-all duration-200 hover:scale-110"
+      >
+        <MdKeyboardDoubleArrowLeft className="text-2xl text-gray-800" />
+      </button>
+      <button
+        onClick={scrollNext}
+        className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/80 
+                 hover:bg-white shadow-md transition-all duration-200 hover:scale-110"
+      >
+        <MdKeyboardDoubleArrowRight className="text-2xl text-gray-800" />
+      </button>
+    </div>
+  );
 }

@@ -6,99 +6,124 @@ import { SessionProvider } from "next-auth/react";
 import { useHeaders } from "@/store/useheaders";
 import Cartsidebar from "./Cartsidebar";
 import { IoSearchOutline } from "react-icons/io5";
+import { RiHome3Line } from "react-icons/ri";
+import { BsBox } from "react-icons/bs";
+import { FiInfo, FiUser } from "react-icons/fi";
 import Searchsidebar from "./Searchsidebar";
 import { useCartproducts } from "@/store/useCartproducts";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import Image from "next/image";
+
+const navLinks = [
+  { href: "/", label: "خانه", icon: RiHome3Line },
+  { href: "/products", label: "محصولات", icon: BsBox },
+  { href: "/", label: "درباره ما", icon: FiInfo },
+  { href: "/panel", label: "پنل کاربری", icon: FiUser },
+];
 
 function Header() {
-  const searchboolean = useHeaders((state) => state.searchboolean);
-  const searchbooleanchange = useHeaders((state) => state.searchbooleanchange);
-  const cartboolean = useHeaders((state) => state.cartboolean);
-  const cartbooleanchange = useHeaders((state) => state.cartbooleanchange);
-  const profileboolean = useHeaders((state) => state.profileboolean);
-  const profilebooleanchange = useHeaders(
-    (state) => state.profilebooleanchange
-  );
-  const products = useCartproducts((state) => state.products);
-  const productchange = useCartproducts((state) => state.productschange);
-  
+  const {
+    searchboolean,
+    searchbooleanchange,
+    cartboolean,
+    cartbooleanchange,
+  } = useHeaders((state) => ({
+    searchboolean: state.searchboolean,
+    searchbooleanchange: state.searchbooleanchange,
+    cartboolean: state.cartboolean,
+    cartbooleanchange: state.cartbooleanchange,
+  }));
+
+  const { products, productchange } = useCartproducts((state) => ({
+    products: state.products,
+    productchange: state.productschange,
+  }));
+
   useEffect(() => {
+    const loadCartProducts = () => {
       const storedProducts = localStorage.getItem("cartproducts");
       if (storedProducts) {
         productchange(JSON.parse(storedProducts));
       }
-  
-      const handleFocus = () => {
-        const storedProducts = localStorage.getItem("cartproducts");
-        if (storedProducts) {
-          productchange(JSON.parse(storedProducts));
-        }
-      };
-  
-      window.addEventListener("focus", handleFocus);
-  
-      return () => {
-        window.removeEventListener("focus", handleFocus);
-      };
-    }, [productchange]);
+    };
+
+    loadCartProducts();
+    window.addEventListener("focus", loadCartProducts);
+    return () => window.removeEventListener("focus", loadCartProducts);
+  }, [productchange]);
 
   return (
-    <header className="flex z-10 fixed  w-full h-[5rem] top-0 justify-between bg-slate-300">
+    <>
+      <header className="fixed top-0 w-full z-50 bg-white shadow-md">
+        <div className="container mx-auto px-4 h-20">
+          <div className="flex items-center justify-between h-full">
+            {/* Actions */}
+            <div className="flex items-center gap-6">
+              {/* User Menu */}
+              <div className="border-l pl-6">
+                <SessionProvider>
+                  <Avatarsection />
+                </SessionProvider>
+              </div>
+
+              {/* Cart */}
+              <button
+                onClick={() => cartbooleanchange(true)}
+                className="hidden md:flex items-center p-2 text-gray-700 hover:text-blue-600 
+                         transition-colors duration-200 relative"
+              >
+                <LuShoppingCart className="text-2xl" />
+                {products?.length > 0 && (
+                  <span className="absolute -top-1 -left-1 bg-red-500 text-white text-xs 
+                                 w-5 h-5 flex items-center justify-center rounded-full">
+                    {products.length}
+                  </span>
+                )}
+              </button>
+
+              {/* Search */}
+              <button
+                onClick={() => searchbooleanchange(true)}
+                className="p-2 text-gray-700 hover:text-blue-600 transition-colors duration-200"
+              >
+                <IoSearchOutline className="text-2xl" />
+              </button>
+            </div>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex flex-row-reverse items-center space-x-reverse space-x-8 ml-auto">
+              {navLinks.map(({ href, label, icon: Icon }) => (
+                <Link
+                  key={href + label}
+                  href={href}
+                  className="flex flex-row-reverse items-center gap-2 px-3 py-2 text-gray-700 hover:text-blue-600 
+                           transition-colors duration-200 font-medium"
+                >
+                  <Icon className="text-xl" />
+                  <span>{label}</span>
+                </Link>
+              ))}
+            </nav>
+
+            {/* Logo */}
+            <Link href="/" className="flex items-center">
+              <div className="w-12 h-12 relative">
+                <Image
+                  src="/logo.png"
+                  alt="Logo"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* Sidebars */}
       {cartboolean && <Cartsidebar />}
       {searchboolean && <Searchsidebar />}
-      {}
-      {/* */}
-      <div className="flex my-auto ml-8 justify-between w-[8rem] relative" >
-       <div> 
-        <LuShoppingCart
-          className="hidden md:block text-2xl cursor-pointer"
-          onClick={() => cartbooleanchange(true)}
-        />
-        <p className={`${(products?.length==0)?'hidden':'hidden md:block'} absolute bg-red-400 text-white rounded-2xl px-1`}>{products?.length}</p>
-        </div>
-       
-
-        <SessionProvider >
-          <Avatarsection />
-        </SessionProvider>
-
-        <IoSearchOutline
-          className="text-2xl cursor-pointer mr-auto md:mr-0"
-          onClick={() => searchbooleanchange(true)}
-        />
-      </div>
-
-      {/*navbar */}
-      <div className="hidden md:flex md:flex-row-reverse md:space-x-4 mr-8 ">
-        <Link
-          href="/"
-          className="m-3 p-1 text-sm md:font-bold hover:border-b-2 hover:border-blue-600 transition ease-in-out duration-100 "
-        >
-          خانه
-        </Link>
-        <Link
-          href="/products"
-          className="m-3 p-1 text-sm md:font-bold hover:border-b-2 hover:border-blue-600 transition ease-linear "
-        >
-          محصولات
-        </Link>
-        <Link
-          href="/"
-          className="m-3 p-1 text-sm md:font-bold hover:border-b-2 hover:border-blue-600 transition ease-in-out "
-        >
-          درباره ما
-        </Link>
-        <Link
-          href="/panel"
-          className="m-3 p-1 text-sm md:font-bold hover:border-b-2 hover:border-blue-600 transition ease-in-out  "
-        >
-          پنل کاربری
-        </Link>
-      </div>
-
-      {/* searchbar*/}
-      <div>logo</div>
-    </header>
+    </>
   );
 }
 

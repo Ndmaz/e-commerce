@@ -1,77 +1,80 @@
 "use client";
-
+import { RiEqualizerLine } from "react-icons/ri";
 import Productfilter from "@/components/Productfilter";
 import ProductList from "@/components/ProductList";
-import Providers from "@/components/Providers";
-
-import { useState } from "react";
-import { IoIosArrowDropleft } from "react-icons/io";
-import { IoIosArrowDropright } from "react-icons/io";
-
-import { HiOutlineBars3 } from "react-icons/hi2";
+import { IoIosArrowDropleft, IoIosArrowDropright } from "react-icons/io";
 import { useparameters } from "@/store/useparameters";
+import { useState } from "react";
 
 export default function Products() {
-  const [filteron, setfilteron] = useState(false);
   const page = useparameters((state) => state.page);
   const pagechange = useparameters((state) => state.pagechange);
- 
-  return (
-    <div className="mb-[14rem]  flex flex-col justify-between transition-all duration-100  h-full  ">
-      
-      <div dir="rtl" className={`bg-slate-300 ml-auto w-full backdrop-blur-lg border-t-2 border-slate-400  rounded-bl-md` }>
-        <HiOutlineBars3
-          className="text-3xl my-auto "
-          onClick={() => setfilteron(!filteron)}
-        />
-        {filteron && <Productfilter />}
-      </div>
-      <ProductList />
-      <div className="w-full flex justify-center space-x-1 text-lg h-8  ">
-        <div
-          className="bg-slate-200 p-1 rounded-sm hover:shadow-md cursor-pointer"
-          onClick={() => {
-            if (page == 1) {
-              pagechange(1);
-              return;
-            }
-            pagechange(page - 1);
-            return;
-          }}
-        >
-          <IoIosArrowDropleft />
-        </div>
-        {page == 1 ? (
-          ""
-        ) : (
-          <div
-            className="bg-slate-200 p-1 rounded-sm hover:shadow-md cursor-pointer"
-            onClick={() => pagechange(page - 1)}
-          >
-            {page - 1}
-          </div>
-        )}
+  const [showFilter, setShowFilter] = useState(false);
 
-        <div className="bg-slate-300 p-1 rounded-sm hover:shadow-md cursor-pointer">
-          {page}
-        </div>
-        <div
-          className="bg-slate-200 p-1 rounded-sm hover:shadow-md cursor-pointer"
-          onClick={() => pagechange(page + 1)}
+  return (
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      {/* Mobile Filter Trigger */}
+      <div className="md:hidden sticky top-[5rem] bg-white z-40 shadow-sm">
+        <button
+          onClick={() => setShowFilter(!showFilter)}
+          className="flex items-center gap-2 p-4 w-full justify-center text-gray-700 hover:bg-gray-50"
         >
-          {page + 1}
+          <RiEqualizerLine className="text-xl" />
+          <span>فیلتر محصولات</span>
+        </button>
+      </div>
+
+      <div className="container mx-auto px-4 relative">
+        <div className="flex">
+          <ProductList />
+          <Productfilter isOpen={showFilter} onClose={() => setShowFilter(false)} />
         </div>
-        <div
-          className="bg-slate-200 p-1 rounded-sm hover:shadow-md cursor-pointer"
-          onClick={() => pagechange(page + 2)}
-        >
-          {page + 2}
-        </div>
-        <div
-          className="bg-slate-200 p-1 rounded-sm hover:shadow-md cursor-pointer"
-          onClick={() => pagechange(page + 1)}
-        >
-          <IoIosArrowDropright />
+      </div>
+
+      {/* Pagination */}
+      <div className="mt-auto bg-white  py-4 shadow-md md:shadow-none">
+        <div className="container mx-auto flex justify-center items-center gap-2">
+          <button
+            className="bg-slate-200 p-2 rounded hover:bg-slate-300 transition-colors disabled:opacity-50"
+            onClick={() => page > 1 && pagechange(page - 1)}
+            disabled={page === 1}
+          >
+            <IoIosArrowDropleft />
+          </button>
+
+          {page > 1 && (
+            <button
+              className="bg-slate-200 p-2 rounded hover:bg-slate-300 transition-colors"
+              onClick={() => pagechange(page - 1)}
+            >
+              {page - 1}
+            </button>
+          )}
+
+          <button className="bg-slate-300 p-2 rounded">
+            {page}
+          </button>
+
+          <button
+            className="bg-slate-200 p-2 rounded hover:bg-slate-300 transition-colors"
+            onClick={() => pagechange(page + 1)}
+          >
+            {page + 1}
+          </button>
+
+          <button
+            className="bg-slate-200 p-2 rounded hover:bg-slate-300 transition-colors"
+            onClick={() => pagechange(page + 2)}
+          >
+            {page + 2}
+          </button>
+
+          <button
+            className="bg-slate-200 p-2 rounded hover:bg-slate-300 transition-colors"
+            onClick={() => pagechange(page + 1)}
+          >
+            <IoIosArrowDropright />
+          </button>
         </div>
       </div>
     </div>

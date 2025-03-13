@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
@@ -8,168 +9,215 @@ import { CgSpinner } from "react-icons/cg";
 import { CheckIcon } from "@radix-ui/react-icons";
 import { S3 } from "aws-sdk";
 import { usePE } from "@/store/usePE";
+import { Product, ProductImages } from "@/types/product";
+
+interface ImageUploadState {
+  [key: string]: boolean;
+}
 
 export default function ImageEdit() {
-  const productinfo = usePE((state) => state.productsinfo);
+  const productinfo = usePE((state) => state.productsinfo) as Product;
   const fieldname = usePE((state) => state.fieldname);
-  const [imagechecked, setimagechecked] = useState("");
-  const id = productinfo.id;
-  const images =(productinfo.images=='')?'هیچ عکسی آپلود نشده است': JSON.parse(productinfo.images);
-  const [Editinput, setEditinput] = useState(images);
+  const [selectedImageType, setSelectedImageType] = useState<string>("");
 
-  const [uploadsuccess, setuploadsuccess] = useState({
-    1: false,
-    2: false,
-    3: false,
-    4: false,
-  });
-  const [error, setError] = useState<String>();
+  // Initialize images state with proper type checking
+  const [images, setImages] = useState<ProductImages>(() => {
+    if (!productinfo.images) {
+      return {
+        pic1: "",
+        pic2: "",
+        pic3: "",
+        pic4: "",
+      };
+    }
 
-  //env variable section
-  const ACCESSKEY: string | undefined =
-    process.env.NEXT_PUBLIC_LIARA_ACCESS_KEY;
-  const SECRETKEY: string | undefined =
-    process.env.NEXT_PUBLIC_LIARA_SECRET_KEY;
-  const ENDPOINT: string | undefined = process.env.NEXT_PUBLIC_LIARA_ENDPOINT;
-  const BUCKET: string | undefined = process.env.NEXT_PUBLIC_LIARA_BUCKET_NAME;
+    // If images is already an object, use it directly
+    if (typeof productinfo.images === 'object') {
+      return productinfo.images as ProductImages;
+    }
 
-  async function handleuploadfile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files[0];
+    // If it's a string, try to parse it
     try {
-      if (!file) {
-        setError("there is no file selected");
-        return;
-      }
+      return JSON.parse(productinfo.images);
+    } catch (e) {
+      console.error("Error parsing images:", e);
+      return {
+        pic1: "",
+        pic2: "",
+        pic3: "",
+        pic4: "",
+      };
+    }
+  });
 
+  const [uploadSuccess, setUploadSuccess] = useState<ImageUploadState>({
+    pic1: false,
+    pic2: false,
+    pic3: false,
+    pic4: false,
+  });
+  const [error, setError] = useState<string>("");
+
+  // AWS S3 configuration
+  const ACCESSKEY = process.env.NEXT_PUBLIC_LIARA_ACCESS_KEY;
+  const SECRETKEY = process.env.NEXT_PUBLIC_LIARA_SECRET_KEY;
+  const ENDPOINT = process.env.NEXT_PUBLIC_LIARA_ENDPOINT;
+  const BUCKET = process.env.NEXT_PUBLIC_LIARA_BUCKET_NAME;
+
+  // Validate environment variables
+  if (!ACCESSKEY || !SECRETKEY || !ENDPOINT || !BUCKET) {
+    console.error("Missing AWS S3 configuration");
+    setError("خطا در تنظیمات سیستم");
+    return null;
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setError("لطفا یک فایل انتخاب کنید");
+      return;
+    }
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setError("فرمت فایل باید jpeg، png یا webp باشد");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setError("حجم فایل نمی‌تواند بیشتر از ۵ مگابایت باشد");
+      return;
+    }
+
+    try {
       const s3 = new S3({
         accessKeyId: ACCESSKEY,
         secretAccessKey: SECRETKEY,
         endpoint: ENDPOINT,
         region: "default",
       });
+
       const params = {
         Bucket: BUCKET,
-        Key: file.name,
+        Key: `products/${file.name}`,
         Body: file,
+        ContentType: file.type,
       };
 
-      const response = await s3.upload(params).promise();
+      await s3.upload(params).promise();
 
-      // Get permanent link
       const permanentSignedUrl = await s3.getSignedUrl("getObject", {
         Bucket: BUCKET,
-        Key: file.name,
-        Expires: 131536000, // 4 year
+        Key: `products/${file.name}`,
+        Expires: 131536000, // 4 years
       });
 
-      switch (imagechecked) {
-        case "عکس کوچک محصول":
-          setEditinput((prev) => ({ ...prev, pic1: permanentSignedUrl }));
-          setuploadsuccess((perv) => ({ ...perv, 1: true }));
-          break;
-        case "عکس اصلی محصول":
-          setEditinput((prev) => ({ ...prev, pic2: permanentSignedUrl }));
-          setuploadsuccess((perv) => ({ ...perv, 2: true }));
-          break;
-        case "عکس محصول جانبی1":
-          setEditinput((prev) => ({ ...prev, pic3: permanentSignedUrl }));
-          setuploadsuccess((perv) => ({ ...perv, 3: true }));
-          break;
-        case "عکس محصول جانبی 2":
-          setEditinput((prev) => ({ ...prev, pic4: permanentSignedUrl }));
-          setuploadsuccess((perv) => ({ ...perv, 4: true }));
-          break;
-      }
+      setImages(prev => ({
+        ...prev,
+        [selectedImageType]: permanentSignedUrl
+      }));
 
-      console.log("File uploaded successfully");
+      setUploadSuccess(prev => ({
+        ...prev,
+        [selectedImageType]: true
+      }));
+
+      setError("");
     } catch (error) {
-      setError("Error uploading file: " + error.message);
+      console.error("Upload error:", error);
+      setError("خطا در آپلود فایل. لطفا دوباره تلاش کنید");
     }
-  }
-  async function mutate() {
-    try {
-      const res = await fetch("http://localhost:3000/api/PEmodifying", {
+  };
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch("/api/PEmodifying", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ Editinput, id, fieldname }),
+        body: JSON.stringify({
+          Editinput: JSON.stringify(images), // Ensure images are stringified
+          id: productinfo.id,
+          fieldname,
+        }),
       });
-      if (res.ok) {
-        return res.json();
-      }
-    } catch (error) {}
-  }
-  const mutation = useMutation(mutate);
-  return (
-    <div className=" flex flex-col">
-      <label htmlFor="">
-        عکس کوچک محصول
-        <input
-          type="radio"
-          name="dd"
-          id=""
-          value="عکس کوچک محصول"
-          checked={imagechecked === "عکس کوچک محصول"}
-          onChange={(e) => setimagechecked(e.target.value)}
-        />
-      </label>
-      {uploadsuccess[1] ? <CheckIcon className="text-green-600 " /> : ""}
-      <label htmlFor="">
-        عکس اصلی محصول
-        <input
-          type="radio"
-          name="dd"
-          id=""
-          value="عکس اصلی محصول"
-          checked={imagechecked === "عکس اصلی محصول"}
-          onChange={(e) => setimagechecked(e.target.value)}
-        />
-      </label>
-      {uploadsuccess[2] ? <CheckIcon className="text-green-600 " /> : ""}
-      <label htmlFor="">
-        عکس محصول جانبی1
-        <input
-          type="radio"
-          name="dd"
-          id=""
-          value="عکس محصول جانبی1"
-          checked={imagechecked === "عکس محصول جانبی1"}
-          onChange={(e) => setimagechecked(e.target.value)}
-        />
-      </label>
-      {uploadsuccess[3] ? <CheckIcon className="text-green-600 " /> : ""}
-      <label htmlFor="">
-        عکس محصول جانبی 2
-        <input
-          type="radio"
-          name="dd"
-          id=""
-          value="عکس محصول جانبی 2"
-          checked={imagechecked === "عکس محصول جانبی 2"}
-          onChange={(e) => setimagechecked(e.target.value)}
-        />
-      </label>{" "}
-      {uploadsuccess[4] ? <CheckIcon className="text-green-600 " /> : ""}
-      <div className="flex flex-col space-x-4 items-center ">
-        <div className="flex items-center space-x-4">
-          <Label className="my-4  ">{imagechecked}</Label>
-          <Input
-            className=" w-[40vw]"
-            name={imagechecked}
-            type="file"
-            onChange={handleuploadfile}
-          />
-        </div>
-        <Button type="button" className=" my-auto" onClick={mutation.mutate}>
-          ثبت تغیر
-          {mutation.isLoading && (
-            <CgSpinner strokeWidth="1" className="animate-spin text-5xl" />
-          )}
-          {mutation.isSuccess && <CheckIcon className="text-green-600 " />}
-        </Button>
 
-        {error}
+      if (!response.ok) {
+        throw new Error("خطا در ثبت تغییرات");
+      }
+
+      return response.json();
+    }
+  });
+
+  const imageTypes = [
+    { key: "pic1", label: "عکس کوچک محصول" },
+    { key: "pic2", label: "عکس اصلی محصول" },
+    { key: "pic3", label: "عکس محصول جانبی 1" },
+    { key: "pic4", label: "عکس محصول جانبی 2" },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {imageTypes.map(({ key, label }) => (
+          <div key={key} className="space-y-2">
+            <div className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="imageType"
+                value={key}
+                checked={selectedImageType === key}
+                onChange={(e) => setSelectedImageType(e.target.value)}
+                className="form-radio"
+              />
+              <Label>{label}</Label>
+              {uploadSuccess[key] && (
+                <CheckIcon className="text-green-500" />
+              )}
+            </div>
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              disabled={!selectedImageType}
+            />
+          </div>
+        ))}
       </div>
-      <p className="overflow-auto w-[60vw] bg-[#fce1af] rounded-sm ml-1">{JSON.stringify(Editinput)}</p>
+
+      {error && (
+        <div className="p-3 bg-red-50 text-red-600 rounded-md">
+          {error}
+        </div>
+      )}
+
+      <div className="flex justify-center">
+        <Button
+          onClick={() => mutation.mutate()}
+          disabled={mutation.isLoading}
+        >
+          {mutation.isLoading ? (
+            <>
+              <CgSpinner className="animate-spin ml-2" />
+              در حال ثبت...
+            </>
+          ) : (
+            "ثبت تغییرات"
+          )}
+          {mutation.isSuccess && (
+            <CheckIcon className="text-green-600 ml-2" />
+          )}
+        </Button>
+      </div>
+
+      <div className="bg-gray-50 p-4 rounded-md overflow-x-scroll">
+        <pre className="text-sm">
+          {JSON.stringify(images, null, 2)}
+        </pre>
+      </div>
     </div>
   );
 }

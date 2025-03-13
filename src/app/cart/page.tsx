@@ -3,167 +3,180 @@
 import { Button } from "@/components/ui/button";
 import { useCartproducts } from "@/store/useCartproducts";
 import Link from "next/link";
-import React, { useEffect } from "react";
-
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CiSquareMinus, CiSquarePlus } from "react-icons/ci";
 import { FaArrowRight } from "react-icons/fa";
+import { IoTrashOutline } from "react-icons/io5";
+
+interface CartProduct {
+  id: string;
+  productname: string;
+  price: number;
+  quantitytotake?: number;
+}
 
 export default function Cart() {
-  const productchange = useCartproducts((state) => state.productschange);
-  const products = useCartproducts((state) => state.products);
-  const order = useCartproducts((state) => state.order);
-  const orderchange = useCartproducts((state) => state.orderchange);
-  const [nextpagetoggle, setnextpagetoggle] = useState(false)
-  const [error,seterror] = useState('')
-  
-  const prviousquantity = useMemo(() => {
-    let quantityresult = {};
-    for (let product in products) {
-      if (product.quantitytotake) {
-        quantityresult = {
-          ...quantityresult,
-          [product.id]: product.quantitytotake,
-        }
-      } else {
-        quantityresult = { ...quantityresult, [product.id]: 1 };
-      }
-    }
-    console.log(quantityresult);
-    return quantityresult;
-  }, [products]);
+  const { products, productschange: productchange, orderchange } = useCartproducts(state => ({
+    products: state.products as CartProduct[],
+    productschange: state.productschange,
+    orderchange: state.orderchange
+  }));
 
-  const [quantity, setQuantity] = useState<{ [key: string]: number }>(prviousquantity);
+  const [nextPageEnabled, setNextPageEnabled] = useState(false);
+  const [error, setError] = useState('');
 
-  const [totalprice, settotalprice] = useState(() => {
-
-    return products.reduce((acumulater, product) => {
-      return acumulater + product.price
-       
-    }, 0);
+  const [quantity, setQuantity] = useState<Record<string, number>>(() => {
+    return products.reduce((acc, product) => ({
+      ...acc,
+      [product.id]: product.quantitytotake || 1
+    }), {});
   });
 
+  const totalPrice = useMemo(() => {
+    return products.reduce((total, product) => {
+      const productQuantity = quantity[product.id] || 1;
+      return total + (product.price * productQuantity);
+    }, 0);
+  }, [products, quantity]);
 
-  const updateQuantity = (productId: string, newQuantity: number) => {
-    setQuantity((prevQuantity) => ({
-      ...prevQuantity,
-      [productId]: newQuantity,
+  const handleQuantityChange = (productId: string, delta: number) => {
+    const currentQuantity = quantity[productId] || 1;
+    const newQuantity = Math.max(1, currentQuantity + delta);
+
+    setQuantity(prev => ({
+      ...prev,
+      [productId]: newQuantity
     }));
-    settotalprice(() => {
-      return products.reduce((acumulator, product) => {
-        if (productId == product.id) {
-          const qunityprice = newQuantity * product.price;
+  };
 
-          return acumulator + qunityprice;
-        }
-        const currentquanity = quantity[product.id] || 1;
-        const qunaityprice = product.price * currentquanity;
+  const handleRemoveProduct = (productId: string) => {
+    const updatedProducts = products.filter(item => item.id !== productId);
+    productchange(updatedProducts);
+    localStorage.setItem("cartproducts", JSON.stringify(updatedProducts));
+  };
 
-        return acumulator + qunaityprice;
-      }, 0);
-    });
+  const handleProceedToCheckout = () => {
+    if (products.length === 0) {
+      setError('لطفا ابتدا محصولی را به سبد خرید اضافه کنید');
+      return;
+    }
+
+    const productsWithQuantity = products.map(product => ({
+      ...product,
+      quantitytotake: quantity[product.id] || 1,
+    }));
+
+    orderchange({ productstobuy: productsWithQuantity, totalprice: totalPrice });
+    setNextPageEnabled(true);
+    setError('');
   };
 
   return (
-    <div
-      className="bg-white overflow-x-auto  md:w-[75vw] md:mx-auto md:rounded-lg p-2"
-      dir="rtl"
-    >
-      <div>
-        <div>محصولات منتخب:</div>
+    <div className="p-6" dir="rtl">
+      <h1 className="text-2xl font-bold mb-6">سبد خرید</h1>
 
-        <table className="mx-auto  ">
-          <thead>
-            <tr className=" space-x-6 ">
-              <td className="border-black border-y-[1px] p-2">اسم محصول</td>
-              <td className="border-black border-y-[1px] p-2">تعداد</td>
-              <td className="border-black border-y-[1px] p-2">قیمت</td>
-              <td className="border-black border-y-[1px] p-2">--</td>
-            </tr>
-          </thead>
-          <tbody className="">
-            {products?.map((product, index) => {
-              const currentQuantity = quantity[product.id] || 1;
-              const qunaityprice = product.price * currentQuantity;
-
-              return (
-                <tr key={product.id} className="">
-                  <td className="p-2 border-l-gray-300 border-b-black border-l-[1px] border-b-[1px]">
-                    {product.productname}
-                  </td>
-                  <td className="p-2 pb-3  border-l-gray-300 border-b-black border-l-[1px] border-b-[1px]">
-                    <div className="flex">
-                      <CiSquarePlus
-                        className="text-2xl ml-2 cursor-pointer"
-                        onClick={() =>
-                          updateQuantity(product.id, currentQuantity + 1)
-                        }
-                      />
-                      {currentQuantity}
-                      <CiSquareMinus
-                        className="text-xl mr-2 cursor-pointer"
-                        onClick={() =>
-                          updateQuantity(product.id, currentQuantity - 1)
-                        }
-                      />
-                    </div>
-                  </td>
-                  <td className="p-2 border-l-gray-300 border-b-black border-l-[1px] border-b-[1px]">
-                    {qunaityprice}
-                  </td>
-                  <td
-                    className="p-2 border-l-gray-300 border-b-black border-l-[1px] border-b-[1px] bg-red-200 cursor-pointer"
-                    onClick={() => {
-                      const spliced = products.filter((item) => item.id !== product.id)
-                      productchange(spliced);
-                      const stringified = JSON.stringify(spliced);
-                      localStorage.setItem("cartproducts", stringified);
-                    }}
-                  >
-                    حذف از لیست
-                  </td>
-                </tr>
-              );
-            })}
-            <tr>
-              <td>قیمت کل</td>
-              <td>{totalprice}</td>
-            </tr>
-          </tbody>
-        </table>
-        <div className="w-1/2 mx-auto ">
-          <Button
-            className="w-full"
-            onClick={() => {
-              if(products.length==0){
-                seterror('محصولی انتخاب نشده')
-                return
-              }
-              const newproducts = products.map((product) => {
-                return {
-                  ...product,
-                  quantitytotake: quantity[product.id] || 1,
-                  totalprice,
-                };
-              });
-                
-              orderchange({ productstobuy: newproducts })
-              setnextpagetoggle(true)
-            }}
-          >
-            تائید
-          </Button>
-        </div>
-        {error}
-        {
-          nextpagetoggle && <Link className="font-bold flex-col" href="/cart/step2">
-
-            <p>مرحله بعد </p>
-            <FaArrowRight className="text-blue-500 " />
+      {products.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-gray-500 mb-4">سبد خرید شما خالی است</p>
+          <Link href="/products" className="text-blue-600 hover:text-blue-700">
+            مشاهده محصولات
           </Link>
-        }
+        </div>
+      ) : (
+        <>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-right py-4 px-4">محصول</th>
+                  <th className="py-4 px-4">تعداد</th>
+                  <th className="py-4 px-4">قیمت واحد</th>
+                  <th className="py-4 px-4">قیمت کل</th>
+                  <th className="py-4 px-4"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.map((product) => {
+                  const productQuantity = quantity[product.id] || 1;
+                  const productTotal = product.price * productQuantity;
 
-      </div>
+                  return (
+                    <tr key={product.id} className="border-b">
+                      <td className="py-4 px-4">{product.productname}</td>
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleQuantityChange(product.id, 1)}
+                            className="p-1 hover:bg-gray-100 rounded"
+                          >
+                            <CiSquarePlus className="text-2xl text-blue-600" />
+                          </button>
+                          <span className="w-8 text-center">{productQuantity}</span>
+                          <button
+                            onClick={() => handleQuantityChange(product.id, -1)}
+                            className="p-1 hover:bg-gray-100 rounded"
+                            disabled={productQuantity <= 1}
+                          >
+                            <CiSquareMinus className="text-2xl text-gray-400" />
+                          </button>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">{product.price.toLocaleString()} تومان</td>
+                      <td className="py-4 px-4">{productTotal.toLocaleString()} تومان</td>
+                      <td className="py-4 px-4">
+                        <button
+                          onClick={() => handleRemoveProduct(product.id)}
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-full"
+                        >
+                          <IoTrashOutline className="text-xl" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-8 border-t pt-6">
+            <div className="flex justify-between items-center mb-6">
+              <span className="text-lg font-medium">جمع کل:</span>
+              <span className="text-xl font-bold">{totalPrice.toLocaleString()} تومان</span>
+            </div>
+
+            {error && (
+              <p className="text-red-500 text-center mb-4">{error}</p>
+            )}
+
+            <div className="flex flex-col gap-4 sm:flex-row sm:justify-end">
+              <Button
+                variant="outline"
+                className="sm:w-auto"
+                onClick={() => window.history.back()}
+              >
+                ادامه خرید
+              </Button>
+
+              <Button
+                className="sm:w-auto"
+                onClick={handleProceedToCheckout}
+              >
+                تکمیل خرید
+              </Button>
+            </div>
+
+            {nextPageEnabled && (
+              <Link
+                href="/cart/step2"
+                className="flex items-center justify-center gap-2 mt-4 text-blue-600 hover:text-blue-700"
+              >
+                <span>مرحله بعد</span>
+                <FaArrowRight />
+              </Link>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }

@@ -1,50 +1,83 @@
 "use client";
 
+import { useState } from "react";
 import { HiOutlineChevronUp } from "react-icons/hi";
 import { CiSearch } from "react-icons/ci";
-import { useState } from "react";
-
-import SearchFunction from "@/components/SearchFunction";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { usePE } from "@/store/usePE";
+import SearchFunction from "@/components/SearchFunction";
+
+interface SearchState {
+  value: string;
+  isActive: boolean;
+}
 
 export default function ProductEditing() {
-  const [searchvalue, setsearchvalue] = useState<String | any | undefined>("");
-  const [searchClicked, setsearchClicked] = useState<Boolean>(false);
+  const [searchState, setSearchState] = useState<SearchState>({
+    value: "",
+    isActive: false,
+  });
   const fieldnameChange = usePE((state) => state.fieldnamechange);
+
+  const handleSearch = () => {
+    if (searchState.value.trim()) {
+      setSearchState(prev => ({ ...prev, isActive: true }));
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchState({ value: "", isActive: false });
+    fieldnameChange("");
+  };
+
   return (
-    <div className="mt-6" dir="rtl">
-      <h1 className="mr-4 text-xl font-mono font-bold">ویرایش محصول</h1>
-      <div className="w-[35vw] flex ml-auto mr-4">
-        <input
-          className="bg-white w-full rounded-r-lg pr-2 "
-          name="search"
-          type="text"
-          placeholder=" جستجو محصول"
-          value={searchvalue}
-          onChange={(e) => {
-            setsearchvalue(e.target.value);
-          }}
-        />
-        <button onClick={() => setsearchClicked(true)}>
-          <CiSearch
-            strokeWidth="0.5"
-            className="text-3xl rounded-l-xl  bg-white"
-          />
-        </button>
-      </div>
+    <div className="space-y-6">
       <div>
-        {searchClicked && <SearchFunction searchvalueprop={searchvalue} />}
+        <h1 className="text-2xl font-bold text-gray-900">ویرایش محصول</h1>
+        <p className="mt-2 text-gray-600">
+          برای ویرایش محصول مورد نظر، ابتدا آن را جستجو کنید.
+        </p>
       </div>
-      {searchClicked && (
-        <HiOutlineChevronUp
-          className="m-6 hover:bg-white rounded-sm "
-          onClick={() => {
-            setsearchClicked(false);
-            setsearchvalue("");
-            fieldnameChange("");
-          }}
-        />
-      )}
+
+      <Card className="p-6">
+        <div className="space-y-4">
+          {/* Search Section */}
+          <div className="flex gap-2">
+            <Input
+              className="flex-1"
+              placeholder="جستجوی محصول..."
+              value={searchState.value}
+              onChange={(e) => setSearchState(prev => ({ ...prev, value: e.target.value }))}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            />
+            <Button
+              onClick={handleSearch}
+              className="min-w-[100px]"
+            >
+              <CiSearch className="ml-2" />
+              جستجو
+            </Button>
+          </div>
+
+          {/* Search Results */}
+          {searchState.isActive && (
+            <div className="space-y-4">
+              <SearchFunction searchValue={searchState.value} />
+
+              <Button
+                variant="ghost"
+                onClick={handleClearSearch}
+                className="flex items-center gap-2"
+              >
+                <HiOutlineChevronUp />
+                پاک کردن جستجو
+              </Button>
+            </div>
+          )}
+        </div>
+      </Card>
     </div>
   );
 }

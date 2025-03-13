@@ -12,375 +12,401 @@ import { useState } from "react";
 import { useMutation } from "react-query";
 
 import { MdPlaylistAdd } from "react-icons/md";
+import { Card } from "@/components/ui/card";
 
-export default function Productmanagement() {
-  //state declaration
-  //input value states
-  const [productname, setProductname] = useState("");
-  const [productcode, setProductcode] = useState("");
-  const [category, setcategory] = useState("");
-  const [brand, setbrand] = useState("");
-  const [price, setprice] = useState("");
-  const [quanity, setquanity] = useState("");
-  const [synopsis, setSynopsis] = useState("");
-  const [description, setDescription] = useState("");
-  const [imagechecked, setimagechecked] = useState("");
-  //permenant link is an object that holds the value to the urls
-  interface Linktypes {
-    pic1: string;
-    pic2: string;
-    pic3: string;
-    pic4: string;
-  }
-  const [permanentLink, setPermanentLink] = useState<Linktypes>({
-    pic1: "",
-    pic2: "",
-    pic3: "",
-    pic4: "",
+interface ProductDetail {
+  detailname: string;
+  detailvalue: string;
+}
+
+interface ProductImages {
+  pic1: string;
+  pic2: string;
+  pic3: string;
+  pic4: string;
+}
+
+interface ProductFormData {
+  productname: string;
+  productcode: string;
+  category: string;
+  brand: string;
+  price: string;
+  quanity: string;
+  synopsis: string;
+  description: string;
+  details: ProductDetail[];
+  permanentLink: ProductImages;
+}
+
+export default function ProductManagement() {
+  // Form state
+  const [formData, setFormData] = useState<ProductFormData>({
+    productname: "",
+    productcode: "",
+    category: "",
+    brand: "",
+    price: "",
+    quanity: "",
+    synopsis: "",
+    description: "",
+    details: [],
+    permanentLink: {
+      pic1: "",
+      pic2: "",
+      pic3: "",
+      pic4: "",
+    },
   });
-  const [details, setdetails] = useState([]);
-  const [key1, setkey1] = useState("");
-  const [key2, setkey2] = useState("");
-  //runtime handling states
-  const [returnvalue, setreturnvalue] = useState<Boolean>();
-  const [datasback, setdatasback] = useState();
-  const [error, setError] = useState<String>();
-  const [issubmiting, setissubmiting] = useState<Boolean>(false);
-  //env variable section
-  const ACCESSKEY: string | undefined =
-    process.env.NEXT_PUBLIC_LIARA_ACCESS_KEY;
-  const SECRETKEY: string | undefined =
-    process.env.NEXT_PUBLIC_LIARA_SECRET_KEY;
-  const ENDPOINT: string | undefined = process.env.NEXT_PUBLIC_LIARA_ENDPOINT;
-  const BUCKET: string | undefined = process.env.NEXT_PUBLIC_LIARA_BUCKET_NAME;
 
-  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files[0];
+  // UI state
+  const [selectedImageType, setSelectedImageType] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // AWS S3 configuration
+  const ACCESSKEY = process.env.NEXT_PUBLIC_LIARA_ACCESS_KEY;
+  const SECRETKEY = process.env.NEXT_PUBLIC_LIARA_SECRET_KEY;
+  const ENDPOINT = process.env.NEXT_PUBLIC_LIARA_ENDPOINT;
+  const BUCKET = process.env.NEXT_PUBLIC_LIARA_BUCKET_NAME;
+
+  // Handle file upload
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setError("لطفا یک فایل انتخاب کنید");
+      return;
+    }
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setError("فرمت فایل باید jpeg، png یا webp باشد");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setError("حجم فایل نمی‌تواند بیشتر از ۵ مگابایت باشد");
+      return;
+    }
 
     try {
-      if (!file) {
-        setError("there is no file selected");
-        return;
-      }
-      /*
-    const client = new S3Client({ 
-         region: "default"
-    ,endpoint:  ENDPOINT
-    ,credentials: {
-      accessKeyId: ACCESSKEY as string
-      ,secretAccessKey: SECRETKEY as string
-    }
-  })
-
-  const params = {
-    Bucket: BUCKET,
-    Key: file.name,
-    Body: file,
-  }
-  await client.send(new PutObjectCommand(params))
-  
-  const command = new GetObjectCommand(params);
-  await getSignedUrl(client, command,{ expiresIn:  131536000 }).then((url) =>setPermanentLink((pervarray)=>[...pervarray,url]));
-*/
-
       const s3 = new S3({
         accessKeyId: ACCESSKEY,
         secretAccessKey: SECRETKEY,
         endpoint: ENDPOINT,
         region: "default",
       });
+
       const params = {
-        Bucket: BUCKET,
-        Key: file.name,
+        Bucket: BUCKET || "",
+        Key: `products/${file.name}`,
         Body: file,
+        ContentType: file.type,
       };
 
-      console.log(s3);
-      const response = await s3.upload(params).promise();
+      await s3.upload(params).promise();
 
-      console.log(response);
-      // Get permanent link
       const permanentSignedUrl = await s3.getSignedUrl("getObject", {
-        Bucket: BUCKET,
-        Key: file.name,
-        Expires: 131536000, // 4 year
+        Bucket: BUCKET || "",
+        Key: `products/${file.name}`,
+        Expires: 131536000, // 4 years
       });
-      switch (imagechecked) {
-        case "عکس کوچک محصول":
-          setPermanentLink((prev) => ({ ...prev, pic1: permanentSignedUrl }));
-          break;
-        case "عکس اصلی محصول":
-          setPermanentLink((prev) => ({ ...prev, pic2: permanentSignedUrl }));
-          break;
-        case "عکس محصول جانبی1":
-          setPermanentLink((prev) => ({ ...prev, pic3: permanentSignedUrl }));
-          break;
-        case "عکس محصول جانبی 2":
-          setPermanentLink((prev) => ({ ...prev, pic4: permanentSignedUrl }));
-          break;
-      }
-      console.log("File uploaded successfully");
-    } catch (error) {
-      setError("Error uploading file: " + error.message);
-    }
-  }
 
-  const submitForm = async () => {
-    try {
-      setissubmiting(true);
-      const res = await fetch("/api/product", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productname,
-          productcode,
-          category,
-          brand,
-          price,
-          quanity,
-          synopsis,
-          description,
-          details,
-          permanentLink,
-        }),
-      });
-      const datas = await res.json;
-      setissubmiting(false);
-      if (res.ok) {
-        alert("!محصول با موفقیت ثبت شد");
-      } else {
-        alert("محصول ثبت نشد");
-        setError("200");
-      }
+      setFormData(prev => ({
+        ...prev,
+        permanentLink: {
+          ...prev.permanentLink,
+          [selectedImageType]: permanentSignedUrl
+        }
+      }));
+
+      setError("");
     } catch (error) {
-      console.log(error);
+      console.error("Upload error:", error);
+      setError("خطا در آپلود فایل. لطفا دوباره تلاش کنید");
     }
   };
-  const { mutate, isSuccess, data } = useMutation(submitForm);
 
-  function Handlesubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  // Handle form submission
+  const submitForm = async () => {
+    try {
+      setIsSubmitting(true);
+      const response = await fetch("/api/product", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error("خطا در ثبت محصول");
+      }
+
+      // Reset form
+      setFormData({
+        productname: "",
+        productcode: "",
+        category: "",
+        brand: "",
+        price: "",
+        quanity: "",
+        synopsis: "",
+        description: "",
+        details: [],
+        permanentLink: {
+          pic1: "",
+          pic2: "",
+          pic3: "",
+          pic4: "",
+        },
+      });
+      setSelectedImageType("");
+      alert("محصول با موفقیت ثبت شد");
+    } catch (error) {
+      console.error(error);
+      setError("خطا در ثبت محصول. لطفا دوباره تلاش کنید");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const { mutate } = useMutation(submitForm);
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     mutate();
-  }
+  };
 
-  // returned datas of the products, how can i
   return (
-    <div className="flex flex-col grow  bg-white md:w-[60vw] md:max-w-xl md:mx-auto pt-6 px-8 md:pt-3  md:mt-6  md:rounded-xl md:shadow-lg">
-      <div className="text-right mr-6 space-y-4 p-4">
-        <p className="font-bold ">ثبت محصول </p>
-        <p>با وارد کردن اطلاعات محصول آنرا ثبت نمایید</p>
-      </div>
+    <div className="max-w-3xl mx-auto p-6">
+      <Card className="p-6">
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">ثبت محصول جدید</h1>
+            <p className="mt-2 text-gray-600">
+              لطفا اطلاعات محصول را وارد کنید
+            </p>
+          </div>
 
-      <form onSubmit={Handlesubmit} className="p-4 space-y-4 text-right">
-        {error}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="p-3 bg-red-50 text-red-600 rounded-md">
+                {error}
+              </div>
+            )}
 
-        <div className="space-y-4">
-          <Label className="" htmlFor="name">
-            نام محصول
-            <Input
-              name="name"
-              type="text"
-              value={productname}
-              onChange={(e) => setProductname(e.target.value)}
-            />
-          </Label>
-          <br />
-          <Label className="" htmlFor="productcode">
-            کد محصول
-            <Input
-              name="productcode"
-              type="text"
-              value={productcode}
-              onChange={(e) => setProductcode(e.target.value)}
-            />
-          </Label>
-          <br />
-          <Label className="" htmlFor="category">
-            نوع محصول
-            <Input
-              name="category"
-              type="text"
-              value={category}
-              onChange={(e) => setcategory(e.target.value)}
-            />
-          </Label>
-          <br />
-          <Label className="" htmlFor="brand">
-            برند محصول
-            <Input
-              name="brand"
-              type="text"
-              value={brand}
-              onChange={(e) => setbrand(e.target.value)}
-            />
-          </Label>
-          <br />
-          <Label className="" htmlFor="price">
-            قیمت
-            <Input
-              name="price"
-              type="text"
-              value={price}
-              onChange={(e) => setprice(e.target.value)}
-            />
-          </Label>
-          <br />
+            {/* Basic Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="productname">نام محصول</Label>
+                <Input
+                  id="productname"
+                  value={formData.productname}
+                  onChange={(e) => setFormData(prev => ({ ...prev, productname: e.target.value }))}
+                  required
+                />
+              </div>
 
-          <Label className="" htmlFor="quanity">
-            تعداد
-            <Input
-              name="quanity"
-              type="text"
-              value={quanity}
-              onChange={(e) => setquanity(e.target.value)}
-            />
-          </Label>
-          <br />
-          <Label className="" htmlFor="synopsis">
-            توضیح کوتاه
-            <Textarea
-              name="synopsis"
-              value={synopsis}
-              onChange={(e) => setSynopsis(e.target.value)}
-            />
-          </Label>
-          <br />
-          <Label className="" htmlFor="description">
-            توضیح کامل
-            <Textarea
-              name="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </Label>
-          <br />
-          <Label htmlFor="detail">
-            مشخصات
-            <div className="flex " dir="rtl">
-              <Input
-                className="ml-1"
-                name="detailname"
-                type="text"
-                placeholder="مشخصه"
-                value={key1}
-                onChange={(e) => setkey1(e.target.value)}
-              />
-              <Input
-                name="detailvalue"
-                type="text"
-                placeholder="توصیف"
-                value={key2}
-                onChange={(e) => setkey2(e.target.value)}
+              <div className="space-y-2">
+                <Label htmlFor="productcode">کد محصول</Label>
+                <Input
+                  id="productcode"
+                  value={formData.productcode}
+                  onChange={(e) => setFormData(prev => ({ ...prev, productcode: e.target.value }))}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="category">دسته‌بندی</Label>
+                <Input
+                  id="category"
+                  value={formData.category}
+                  onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="brand">برند</Label>
+                <Input
+                  id="brand"
+                  value={formData.brand}
+                  onChange={(e) => setFormData(prev => ({ ...prev, brand: e.target.value }))}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="price">قیمت</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  value={formData.price}
+                  onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="quanity">تعداد</Label>
+                <Input
+                  id="quanity"
+                  type="number"
+                  value={formData.quanity}
+                  onChange={(e) => setFormData(prev => ({ ...prev, quanity: e.target.value }))}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="space-y-2">
+              <Label htmlFor="synopsis">توضیح کوتاه</Label>
+              <Textarea
+                id="synopsis"
+                value={formData.synopsis}
+                onChange={(e) => setFormData(prev => ({ ...prev, synopsis: e.target.value }))}
+                required
               />
             </div>
-            <MdPlaylistAdd
-              className="text-xl"
-              onClick={() => {
-                setdetails((perv) => [
-                  ...perv,
-                  { detailname: key1, detailvalue: key2 },
-                ]);
-                setkey1("");
-                setkey2("");
-              }}
-            />
-          </Label>
-          <div>
-            {details.map((detail) => {
-              return (
-                <div
-                  className="flex flex-grow justify-center"
-                  key={detail.detailname}
+
+            <div className="space-y-2">
+              <Label htmlFor="description">توضیح کامل</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                required
+              />
+            </div>
+
+            {/* Product Details */}
+            <div className="space-y-4">
+              <Label>مشخصات محصول</Label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="نام مشخصه"
+                  value={formData.details[formData.details.length - 1]?.detailname || ""}
+                  onChange={(e) => {
+                    const newDetails = [...formData.details];
+                    if (!newDetails[newDetails.length - 1]) {
+                      newDetails.push({ detailname: e.target.value, detailvalue: "" });
+                    } else {
+                      newDetails[newDetails.length - 1].detailname = e.target.value;
+                    }
+                    setFormData(prev => ({ ...prev, details: newDetails }));
+                  }}
+                />
+                <Input
+                  placeholder="مقدار"
+                  value={formData.details[formData.details.length - 1]?.detailvalue || ""}
+                  onChange={(e) => {
+                    const newDetails = [...formData.details];
+                    if (!newDetails[newDetails.length - 1]) {
+                      newDetails.push({ detailname: "", detailvalue: e.target.value });
+                    } else {
+                      newDetails[newDetails.length - 1].detailvalue = e.target.value;
+                    }
+                    setFormData(prev => ({ ...prev, details: newDetails }));
+                  }}
+                />
+                <Button
+                  type="button"
+                  onClick={() => {
+                    if (formData.details[formData.details.length - 1]?.detailname &&
+                      formData.details[formData.details.length - 1]?.detailvalue) {
+                      setFormData(prev => ({
+                        ...prev,
+                        details: [...prev.details, { detailname: "", detailvalue: "" }]
+                      }));
+                    }
+                  }}
                 >
-                  <p className="">
-                    {detail.detailvalue}:{detail.detailname}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
+                  <MdPlaylistAdd className="ml-2" />
+                  افزودن
+                </Button>
+              </div>
 
-          <br />
+              {/* Display added details */}
+              <div className="space-y-2">
+                {formData.details.map((detail, index) => (
+                  <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                    <span className="font-medium">{detail.detailname}:</span>
+                    <span>{detail.detailvalue}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setFormData(prev => ({
+                          ...prev,
+                          details: prev.details.filter((_, i) => i !== index)
+                        }));
+                      }}
+                    >
+                      حذف
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-          <div className="flex flex-col pb-3 space-y-2">
-            <label className="border rounded-sm">
-              عکس کوچک محصول
-              <input
-                type="radio"
-                name="dd"
-                id=""
-                value="عکس کوچک محصول"
-                checked={imagechecked === "عکس کوچک محصول"}
-                onChange={(e) => setimagechecked(e.target.value)}
-              />
-              {permanentLink.pic1 != "" ? (
-                <CheckIcon className="text-green-500" />
+            {/* Image Upload */}
+            <div className="space-y-4">
+              <Label>تصاویر محصول</Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  { key: "pic1", label: "تصویر کوچک" },
+                  { key: "pic2", label: "تصویر اصلی" },
+                  { key: "pic3", label: "تصویر جانبی 1" },
+                  { key: "pic4", label: "تصویر جانبی 2" },
+                ].map(({ key, label }) => (
+                  <div key={key} className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="imageType"
+                        value={key}
+                        checked={selectedImageType === key}
+                        onChange={(e) => setSelectedImageType(e.target.value)}
+                      />
+                      <Label>{label}</Label>
+                      {formData.permanentLink[key as keyof ProductImages] && (
+                        <CheckIcon className="text-green-500" />
+                      )}
+                    </div>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleUpload}
+                      disabled={!selectedImageType}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <CgSpinner className="animate-spin ml-2" />
+                  در حال ثبت...
+                </>
               ) : (
-                ""
+                "ثبت محصول"
               )}
-            </label>
-
-            <label className="border rounded-sm">
-              عکس اصلی محصول
-              <input
-                type="radio"
-                name="dd"
-                id=""
-                value="عکس اصلی محصول"
-                checked={imagechecked === "عکس اصلی محصول"}
-                onChange={(e) => setimagechecked(e.target.value)}
-              />
-              {permanentLink.pic2 != "" ? (
-                <CheckIcon className="text-green-500" />
-              ) : (
-                ""
-              )}
-            </label>
-
-            <label className="border rounded-sm">
-              عکس محصول جانبی1
-              <input
-                type="radio"
-                name="dd"
-                id=""
-                value="عکس محصول جانبی1"
-                checked={imagechecked === "عکس محصول جانبی1"}
-                onChange={(e) => setimagechecked(e.target.value)}
-              />
-              {permanentLink.pic3 != "" ? (
-                <CheckIcon className="text-green-500" />
-              ) : (
-                ""
-              )}
-            </label>
-
-            <label className="border rounded-sm">
-              عکس محصول جانبی 2
-              <input
-                type="radio"
-                name="dd"
-                id=""
-                value="عکس محصول جانبی 2"
-                checked={imagechecked === "عکس محصول جانبی 2"}
-                onChange={(e) => setimagechecked(e.target.value)}
-              />
-              {permanentLink.pic4 != "" ? (
-                <CheckIcon className="text-green-500" />
-              ) : (
-                ""
-              )}
-            </label>
-          </div>
-          <Label>
-            {imagechecked}
-            <Input type="file" onChange={handleUpload} />
-          </Label>
+            </Button>
+          </form>
         </div>
-        <Button type="submit" className="w-full">
-          ثبت محصول {issubmiting && <CgSpinner className="animate-spin" />}
-        </Button>
-      </form>
-      <div className="mt-4 mb-28 md:mb-4 mx-auto text-right"></div>
+      </Card>
     </div>
   );
 }
