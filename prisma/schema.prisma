@@ -77,14 +77,14 @@ model Order {
   price           String
   paymentcallback Boolean
   status          String
-  authority           String
-  
-} 
- model General{
-  id Int @id @default(autoincrement())
-  description String
-  mainpageimage String
-  logoimage String
-  contactinfo String
+  authority       String
+}
+
+model General {
+  id                     Int    @id @unique @default(autoincrement())
+  description            String
+  mainpageimage          String
+  logoimage              String
+  contactinfo            String
   productcartonloadimage String
- }
+}

@@ -1,31 +1,33 @@
-import { useQuery } from "react-query"
+import { useQuery } from "@tanstack/react-query";
+import { Product } from "@/types/product";
 
-//the fetch and the data to fetch
+interface ProductResponse {
+    product: Product;
+}
 
-export const useAPF = (id: string) => {
-    async function queryfunction() {
+async function fetchProduct(id: string): Promise<Product> {
+    try {
+        const response = await fetch('/api/ProductFetch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+        });
 
-        try {
-            const res = await fetch('http://localhost:3000/api/ProductFetch', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id })
-
-            })
-            if (res.ok) {
-                const datacapsole = await res.json()
-
-
-                return datacapsole.product
-            }
-        } catch (error) {
-            return error
+        if (!response.ok) {
+            throw new Error('Failed to fetch product');
         }
 
+        const data: ProductResponse = await response.json();
+        return data.product;
+    } catch (error) {
+        throw new Error('Failed to fetch product');
     }
-    return useQuery(
-        ['d'],
-        queryfunction
-    )
-
 }
+
+export const useAPF = (id: string) => {
+    return useQuery({
+        queryKey: ['product', id],
+        queryFn: () => fetchProduct(id),
+        enabled: !!id,
+    });
+};

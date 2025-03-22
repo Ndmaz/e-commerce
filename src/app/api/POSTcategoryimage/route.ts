@@ -1,9 +1,9 @@
-import prisma from "@/lib/database"
+import prisma from "@/lib/prisma"
 
 
 
 export async function POST(req: Request) {
-
+    
     const { categoryvalue, categoryimageurl } = await req.json()
     const id = parseFloat(categoryvalue)
     try {

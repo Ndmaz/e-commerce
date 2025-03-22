@@ -5,10 +5,13 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { S3 } from "aws-sdk";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CheckIcon } from "@radix-ui/react-icons";
 import { CgSpinner } from "react-icons/cg";
 import { MdImage } from "react-icons/md";
+import { useAGetmainimage } from "@/store/AsyncStore/useAGetmainimage";
+import { useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/store/use-toast"; 
 
 interface ImageUploadState {
   isLoading: boolean;
@@ -22,7 +25,16 @@ export default function MainPageImage() {
     error: null,
     success: false,
   });
+  const { data: mainImage, isLoading: isLoadingMainImage } = useAGetmainimage();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (mainImage?.imageUrl) {
+      setImageUrl(mainImage.imageUrl);
+    }
+  }, [mainImage]);
 
   const ACCESSKEY = process.env.NEXT_PUBLIC_LIARA_ACCESS_KEY;
   const SECRETKEY = process.env.NEXT_PUBLIC_LIARA_SECRET_KEY;
@@ -67,7 +79,7 @@ export default function MainPageImage() {
       });
 
       const params = {
-        Bucket: BUCKET,
+        Bucket: BUCKET!,
         Key: `hero/${file.name}`,
         Body: file,
         ContentType: file.type,
@@ -76,19 +88,28 @@ export default function MainPageImage() {
       await s3.upload(params).promise();
 
       const permanentSignedUrl = await s3.getSignedUrl("getObject", {
-        Bucket: BUCKET,
+        Bucket: BUCKET!,
         Key: `hero/${file.name}`,
         Expires: 131536000, // 4 years
       });
 
       setImageUrl(permanentSignedUrl);
       setUploadState(prev => ({ ...prev, success: true }));
+      toast({
+        title: "تصویر با موفقیت آپلود شد",
+        description: "حالا می‌توانید تغییرات را ذخیره کنید",
+      });
     } catch (error) {
       console.error("Upload error:", error);
       setUploadState(prev => ({
         ...prev,
         error: "خطا در آپلود فایل. لطفا دوباره تلاش کنید"
       }));
+      toast({
+        title: "خطا در آپلود",
+        description: "خطا در آپلود فایل. لطفا دوباره تلاش کنید",
+        variant: "destructive",
+      });
     } finally {
       setUploadState(prev => ({ ...prev, isLoading: false }));
     }
@@ -100,32 +121,66 @@ export default function MainPageImage() {
         ...prev,
         error: "لطفا ابتدا یک تصویر آپلود کنید"
       }));
+      toast({
+        title: "خطا",
+        description: "لطفا ابتدا یک تصویر آپلود کنید",
+        variant: "destructive",
+      });
       return;
     }
 
     try {
       setUploadState(prev => ({ ...prev, isLoading: true, error: null }));
 
-      const response = await fetch("/api/hero-image", {
+      const response = await fetch("/api/Postmainimage", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ imageUrl }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("خطا در ذخیره تصویر");
+        throw new Error(data.message || "خطا در ذخیره تصویر");
       }
 
-      setUploadState(prev => ({ ...prev, success: true }));
-    } catch (error) {
       setUploadState(prev => ({
         ...prev,
-        error: "خطا در ذخیره تصویر. لطفا دوباره تلاش کنید"
+        success: true,
+        error: null
       }));
+
+      // Invalidate the query to refetch the latest data
+      queryClient.invalidateQueries({ queryKey: ["mainImage"] });
+
+      toast({
+        title: "تصویر با موفقیت ذخیره شد",
+        description: "تصویر صفحه اصلی با موفقیت به‌روزرسانی شد",
+      });
+
+    } catch (error: any) {
+      setUploadState(prev => ({
+        ...prev,
+        error: error.message || "خطا در ذخیره تصویر. لطفا دوباره تلاش کنید",
+        success: false
+      }));
+      toast({
+        title: "خطا",
+        description: error.message || "خطا در ذخیره تصویر. لطفا دوباره تلاش کنید",
+        variant: "destructive",
+      });
     } finally {
       setUploadState(prev => ({ ...prev, isLoading: false }));
     }
   };
+
+  if (isLoadingMainImage) {
+    return (
+      <div className="flex justify-center items-center h-[60vh]">
+        <CgSpinner className="animate-spin text-4xl text-gray-400" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

@@ -1,4 +1,4 @@
-import prisma from "@/lib/database";
+import prisma from "@/lib/prisma";
 
 
 
@@ -8,7 +8,7 @@ export async function GET() {
 
         const pricedoff = await prisma.product.findMany(
             {
-                take:6,
+                take: 6,
                 where: {
                     NOT: {
                         priceoff: null
@@ -17,7 +17,7 @@ export async function GET() {
             })
 
 
-        return Response.json({ pricedoff})
+        return Response.json({ pricedoff })
 
     } catch (error) {
         return Response.json({ error })

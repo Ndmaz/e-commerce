@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { usePE } from "@/store/usePE";
 import SearchFunction from "@/components/SearchFunction";
+import { toast } from "@/store/use-toast";
 
 interface SearchState {
   value: string;
@@ -22,8 +23,22 @@ export default function ProductEditing() {
   const fieldnameChange = usePE((state) => state.fieldnamechange);
 
   const handleSearch = () => {
-    if (searchState.value.trim()) {
+    const trimmedValue = searchState.value.trim();
+    if (trimmedValue) {
       setSearchState(prev => ({ ...prev, isActive: true }));
+    } else {
+      toast({
+        title: "خطا",
+        description: "لطفا یک عبارت برای جستجو وارد کنید",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSearch();
     }
   };
 
@@ -33,7 +48,7 @@ export default function ProductEditing() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir="rtl">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">ویرایش محصول</h1>
         <p className="mt-2 text-gray-600">
@@ -50,7 +65,7 @@ export default function ProductEditing() {
               placeholder="جستجوی محصول..."
               value={searchState.value}
               onChange={(e) => setSearchState(prev => ({ ...prev, value: e.target.value }))}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              onKeyDown={handleKeyDown}
             />
             <Button
               onClick={handleSearch}

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/database";
+import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 // Input validation schema
@@ -35,6 +35,7 @@ export async function POST(req: Request) {
                 id: true,
                 productname: true,
                 price: true,
+                priceoff: true,
                 images: true,
                 category: {
                     select: {

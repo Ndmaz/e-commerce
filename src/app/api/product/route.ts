@@ -1,12 +1,12 @@
 
-import prisma from "@/lib/database";
+import prisma from "@/lib/prisma";
 
 
 
 export async function POST(req: Request, res: Response) {
   try {
-
-    const { productname
+    
+    const {       productname
       , productcode
       , category
       , brand
@@ -22,14 +22,14 @@ export async function POST(req: Request, res: Response) {
     //checking if there is an existing category
     const CheckCategory = await prisma.category.findUnique({
       where: {
-        name: category
-      }
+name: category
+}
     })
     // checking if there is an existing brand
     const CheckBrand = await prisma.brand.findUnique({
       where: {
-        name: brand
-      }
+name: brand
+}
     })
 
 
@@ -82,23 +82,23 @@ export async function POST(req: Request, res: Response) {
 
     } else {
       if (CheckBrand) {
-        const product = await prisma.product.create({
-          data: {
-            productname
-            , productcode
-            , price: parseFloat(price)
-            , quanity: parseInt(quanity)
-            , synopsis
-            , description
-            , details: detalsinstring
-            , images: theimageurls,
+    const product = await prisma.product.create({
+      data: {
+        productname
+            ,         productcode
+            ,         price: parseFloat(price)
+            ,         quanity: parseInt(quanity)
+            ,         synopsis
+            ,         description
+            ,         details: detalsinstring
+            ,         images: theimageurls,
             brand: {
-              connect: { id: CheckBrand.id }
+          connect: { id: CheckBrand.id }
             }
             , category: {
-              create: {
-                name: category
-                , categoryimage: ''
+            create: {
+              name: category
+                ,               categoryimage: ''
 
               }
             }
@@ -117,21 +117,21 @@ export async function POST(req: Request, res: Response) {
             , description
             , details: detalsinstring
             , images: theimageurls,
-            brand: {
-              create: {
-                name: brand,
-                brandimage: ''
-              }
+        brand: {
+                      create: {
+              name: brand,
+              brandimage: ''
             }
-            , category: {
+          }
+        , category: {
               create: {
                 name: category
                 , categoryimage: ''
 
               }
             }
-          }
-        })
+      }
+    })
 
         return Response.json({ product })
       }
@@ -139,7 +139,7 @@ export async function POST(req: Request, res: Response) {
 
   } catch (error) {
     console.error(error)
-    return new Response(`error fetching: ${error}`, { status: 500 })
+    return new Response(`error fetching: ${error}`,       { status: 500 })
   }
 
 }

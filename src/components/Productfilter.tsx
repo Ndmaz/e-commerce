@@ -46,7 +46,7 @@ export default function Productfilter({ isOpen, onClose }: ProductFilterProps) {
 
   // Filter Content Component to avoid duplication
   const FilterContent = () => (
-    <div className="h-full">
+    <div className="h-full w-full">
       <p className="font-bold text-lg mb-4"> فیلتر بر اساس:</p>
 
       <div className="border-l-[1px] border-[#f7e0f0d0] p-2">
@@ -146,7 +146,7 @@ export default function Productfilter({ isOpen, onClose }: ProductFilterProps) {
       )}
 
       {/* Desktop Filter Sidebar */}
-      <div className="hidden md:block w-1/4 bg-white p-6 rounded-lg shadow-md fixed right-4 top-[6rem] max-h-[calc(100vh-8rem)] overflow-y-auto">
+      <div className="hidden md:block bg-[#f3f3f3] p-6 mt-12 rounded-lg shadow-md overflow-y-auto">
         <FilterContent />
       </div>
     </div>

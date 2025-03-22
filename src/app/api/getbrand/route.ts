@@ -1,21 +1,23 @@
-import prisma from "@/lib/database";
-
-
+import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
 
 export async function GET() {
-    
     try {
+        const brands = await prisma.brand.findMany();
         
-        const brands= await prisma.brand.findMany(
+        if (!brands.length) {
+            return NextResponse.json(
+                { message: "No brands found" },
+                { status: 404 }
+            );
+        }
 
-        )
-       
-
-        return Response.json({brands})
-
+        return NextResponse.json({ brands });
     } catch (error) {
-        return Response.json({error})
+        console.error("Error fetching brands:", error);
+        return NextResponse.json(
+            { message: "Error fetching brands" },
+            { status: 500 }
+        );
     }
-
-
 }

@@ -1,4 +1,4 @@
-import prisma from "@/lib/database"
+import prisma from "@/lib/prisma"
 
 
 
@@ -133,6 +133,6 @@ export async function POST(req: Request) {
         }
 
     } catch (error) {
-        return Response.json({ status: 500 })
+                return Response.json(            { status: 500 })
     }
 }

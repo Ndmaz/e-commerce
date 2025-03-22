@@ -1,30 +1,36 @@
-import { useQuery } from "react-query"
+import { useQuery } from "@tanstack/react-query";
+import { Product } from "@/types/product";
 
-//the fetch and the data to fetch
+interface SearchResponse {
+    product: Product[];
+    message?: string;
+}
 
-export const useAPR=(searchvalueprop:string)=>{
-    async function queryfunction(){
+async function fetchProducts(searchValue: string): Promise<Product[]> {
+    try {
+        const response = await fetch('/api/PEsearchresult', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ searchvalueprop: searchValue }),
+        });
 
-        try {
-            const res=await fetch('http://localhost:3000/api/PEsearchresult',{
-                method:'POST',
-                headers:{'Content-Type':'application/json'},
-                     body:JSON.stringify({searchvalueprop})
-                     
-                   })
-                   if (res.ok){
-                    const datacapsole= await res.json()
-                  
-               console.log(datacapsole.product)
-                      return datacapsole.product }
-        } catch (error) {
-            return error
+        if (!response.ok) {
+            throw new Error('Failed to fetch products');
         }
 
+        const data: SearchResponse = await response.json();
+        return data.product;
+    } catch (error) {
+        throw new Error('Failed to fetch products');
     }
-return useQuery(
-    ['d'],
-  queryfunction
-)
-
 }
+
+export const useAPR = (searchValue: string) => {
+    return useQuery({
+        queryKey: ['product-search', searchValue],
+        queryFn: () => fetchProducts(searchValue),
+        enabled: !!searchValue,
+    });
+};

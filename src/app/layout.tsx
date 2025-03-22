@@ -26,9 +26,9 @@ export default function RootLayout({
           <Header />
 
           <main className=" mt-[5rem] sticky min-h-screen  top-[5rem] md:min-h-[100vh]  ">
-            
+
             {children}
-            <Footer/>
+            <Footer />
             <Toaster />
           </main>
 

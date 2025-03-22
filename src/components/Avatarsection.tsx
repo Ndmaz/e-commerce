@@ -24,7 +24,11 @@ export default function Avatarsection() {
   const renderUserMenu = () => {
     if (!session?.user) {
       return (
-        <div className="absolute left-0 mt-2 w-72 bg-white rounded-lg shadow-lg overflow-hidden transform transition-all duration-200 ease-in-out">
+        <div 
+        onMouseOver={() => setIsMenuOpen(true)}
+          onMouseLeave={() => setTimeout(() => setIsMenuOpen(false), 200)} 
+          className="absolute left-0 mt-2 w-72 bg-white rounded-lg shadow-lg overflow-hidden transform transition-all duration-200 ease-in-out"
+          >
           <div className="p-4 border-b border-gray-100">
             <p className="text-right text-gray-600 mb-2">شما وارد نشدید</p>
             <LoginButton />
@@ -34,7 +38,11 @@ export default function Avatarsection() {
     }
 
     return (
-      <div className="absolute left-0 mt-2 w-72 bg-white rounded-lg shadow-lg overflow-hidden transform transition-all duration-200 ease-in-out">
+      <div 
+      onMouseOver={() => setIsMenuOpen(true)}
+        onMouseLeave={() => setTimeout(() => setIsMenuOpen(false), 200)}
+         className="absolute left-0 mt-2 w-72 bg-white rounded-lg shadow-lg overflow-hidden transform transition-all duration-200 ease-in-out"
+         >
         <div className="p-4 bg-gradient-to-r from-blue-500 to-blue-600">
           <div className="flex items-center justify-end gap-3 text-white">
             <div className="text-right">

@@ -1,4 +1,4 @@
-import prisma from "@/lib/database"
+import prisma from "@/lib/prisma"
 
 export async function POST(req: Request) {
 
@@ -11,7 +11,7 @@ export async function POST(req: Request) {
             },
             include: {
                 category: true
-            }
+                            }
         })
         return Response.json({ product })
     } catch (error) {

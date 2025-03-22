@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import { CgSpinner } from "react-icons/cg";
 import { CheckIcon } from "@radix-ui/react-icons";
 import { S3 } from "aws-sdk";

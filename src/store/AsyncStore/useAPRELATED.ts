@@ -1,6 +1,6 @@
-import { useQuery } from "react-query"
+import { useQuery } from "@tanstack/react-query";
 
-type RelatedProduct = {
+interface RelatedProduct {
     id: string;
     productname: string;
     price: number;
@@ -11,7 +11,7 @@ type RelatedProduct = {
     };
 }
 
-type RelatedProductsResponse = {
+interface RelatedProductsResponse {
     products: RelatedProduct[];
     total: number;
 }
@@ -21,32 +21,35 @@ interface RelatedProductsError {
     details?: Record<string, unknown>;
 }
 
-export const useAPRELATED = (categoryId: string | number, isSegment: boolean) => {
-    return useQuery<RelatedProductsResponse, RelatedProductsError>(
-        ['related-products', categoryId, isSegment],
-        async () => {
-            const response = await fetch('http://localhost:3000/api/Relatedproducts', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ categoryid: categoryId, issegment: isSegment })
-            });
+async function fetchRelatedProducts(categoryId: string | number, isSegment: boolean): Promise<RelatedProductsResponse> {
+    try {
+        const response = await fetch('/api/Relatedproducts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ categoryid: categoryId, issegment: isSegment })
+        });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw {
-                    error: errorData.error || 'Failed to fetch related products',
-                    details: errorData.details
-                };
-            }
-
-            const data = await response.json();
-            return data;
-        },
-        {
-            staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-            cacheTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
-            retry: 2,
-            refetchOnWindowFocus: false
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw {
+                error: errorData.error || 'Failed to fetch related products',
+                details: errorData.details
+            };
         }
-    );
+
+        return response.json();
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const useAPRELATED = (categoryId: string | number, isSegment: boolean) => {
+    return useQuery({
+        queryKey: ['related-products', categoryId, isSegment],
+        queryFn: () => fetchRelatedProducts(categoryId, isSegment),
+        staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+        gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
+        retry: 2,
+        refetchOnWindowFocus: false
+    });
 };

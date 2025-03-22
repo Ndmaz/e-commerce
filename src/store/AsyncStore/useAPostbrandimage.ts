@@ -1,28 +1,41 @@
-import { useMutation } from "react-query"
+import { useMutation } from "@tanstack/react-query";
 
+interface Brand {
+    id: number;
+    name: string;
+    imageUrl?: string;
+}
 
-export const useAPostbrandimage=(brandvalue,brandimageurl)=>{
-async function mutatefunction() {
+interface BrandResponse {
+    brand: Brand;
+}
+
+interface PostBrandImageParams {
+    brandvalue: string;
+    brandimageurl: string;
+}
+
+async function postBrandImage({ brandvalue, brandimageurl }: PostBrandImageParams): Promise<Brand> {
     try {
-        
-        const res= await fetch('http://localhost:3000/api/POSTbrandimage',{
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({brandvalue,brandimageurl})
+        const response = await fetch('/api/POSTbrandimage', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ brandvalue, brandimageurl })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to post brand image');
         }
-        )
-        if(res.ok){
-            const data=  await res.json()
-            const branddata=data.brand
-            return branddata
-        }
+
+        const data: BrandResponse = await response.json();
+        return data.brand;
     } catch (error) {
-       
-        return error
-        
+        throw new Error('Failed to post brand image');
     }
 }
 
-    return useMutation(mutatefunction)
-
-}
+export const useAPostbrandimage = (brandvalue: string, brandimageurl: string) => {
+    return useMutation({
+        mutationFn: () => postBrandImage({ brandvalue, brandimageurl }),
+    });
+};

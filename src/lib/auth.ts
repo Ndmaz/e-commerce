@@ -1,18 +1,28 @@
-import { PrismaClient, User } from "@prisma/client";
 import { compare } from "bcrypt";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from 'next-auth/providers/credentials'
+import GoogleProvider from 'next-auth/providers/google'
+import prisma from "@/lib/prisma";
 
-const prisma = new PrismaClient
+interface CustomUser {
+  id: string;
+  email: string;
+  name: string | null;
+  role?: 'USER' | 'ADMIN';
+}
+
 const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt'
   },
   pages: {
     signIn: '/sign-in'
-
   },
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
     CredentialsProvider({
       name: 'Sign in',
       credentials: {
@@ -20,10 +30,8 @@ const authOptions: NextAuthOptions = {
           label: 'Email',
           type: 'email',
           placeholder: 'hello@example.com'
-
         },
         password: { label: 'Password', type: 'password' }
-
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials.password) {
@@ -43,50 +51,56 @@ const authOptions: NextAuthOptions = {
           return null
         }
         return {
-          id: user.id + '',
+          id: user.id.toString(),
           email: user.email,
           name: user.name,
-          role: user.role,
-
+          role: user.role
         }
       }
     })
   ],
   callbacks: {
-    session: ({ session, token }) => {
-      console.log('session callback', { session, token })
+    async signIn({ user, account }) {
+      if (account?.provider === "google") {
+        const existingUser = await prisma.user.findUnique({
+          where: { email: user.email! }
+        });
 
+        if (!existingUser) {
+          await prisma.user.create({
+            data: {
+              email: user.email!,
+              name: user.name,
+              role: 'USER',
+              password: '' // Empty password for OAuth users
+            }
+          });
+        }
+      }
+      return true;
+    },
+    session: ({ session, token }) => {
       return {
         ...session,
         user: {
           ...session.user,
           id: token.id,
           role: token.role
-
-
         }
       }
-
     },
-    jwt: ({ token, user }) => {
-      console.log("jwt callback", { token, user })
+    jwt: ({ token, user, account }) => {
       if (user) {
-
+        const customUser = user as CustomUser;
         return {
           ...token,
-          id: user.id,
-          role: user.role
-
-
+          id: customUser.id,
+          role: customUser.role
         }
       }
-
-
-
       return token
     }
   }
-
 }
 
 export default authOptions

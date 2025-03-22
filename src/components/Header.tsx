@@ -109,7 +109,7 @@ function Header() {
             <Link href="/" className="flex items-center">
               <div className="w-12 h-12 relative">
                 <Image
-                  src="/logo.png"
+                  src=""
                   alt="Logo"
                   fill
                   className="object-contain"

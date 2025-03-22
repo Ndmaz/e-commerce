@@ -13,9 +13,11 @@ import Productcard from "@/components/Productcard";
 import Categoryimagecarousel from "@/components/Categoryimagecarousel";
 import Pricedoffproductscarousel from "@/components/Pricedoffproductscarousel";
 import Brandimagescarousel from "@/components/Brandimagescarousel";
+import { useAGetmainimage } from "@/store/AsyncStore/useAGetmainimage";
+import { CgSpinner } from "react-icons/cg";
 
 export default function Home() {
-  const heroImage = "https://ecommercemountain.storage.iran.liara.space/beach-campfire-4184-x-2779-wallpaper-gauuk7tw4u9qof5v.jpg?AWSAccessKeyId=2m48k681k2lqbaa7&Expires=1858087191&Signature=Ml2PHpa%2B%2BfPFFdGXs1t0kwOEAQs%3D";
+  const { data: mainImage, isLoading: isLoadingMainImage } = useAGetmainimage();
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -23,14 +25,24 @@ export default function Home() {
       <section className="relative h-[40rem] overflow-hidden">
         {/* Hero Background */}
         <div className="absolute inset-0">
-          <Image
-            src={heroImage}
-            alt="Hero background"
-            width={1920}
-            height={1080}
-            priority
-            className="w-full h-full object-cover"
-          />
+          {isLoadingMainImage ? (
+            <div className="w-full h-full flex items-center justify-center bg-gray-100">
+              <CgSpinner className="animate-spin text-4xl text-gray-400" />
+            </div>
+          ) : mainImage?.imageUrl ? (
+            <Image
+              src={mainImage.imageUrl}
+              alt="Hero background"
+              width={1920}
+              height={1080}
+              priority
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+              <p className="text-gray-400">No hero image available</p>
+            </div>
+          )}
           <div className="absolute inset-0 bg-black/30" /> {/* Overlay */}
         </div>
 

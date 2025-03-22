@@ -1,25 +1,35 @@
-import { useMutation } from "react-query"
+import { useMutation } from "@tanstack/react-query";
 
+interface PriceOffResponse {
+    success: boolean;
+    message: string;
+}
 
-export const useAPostpriceoff=(Editinput2,id)=>{
-async function mutatefunction() {
+interface PostPriceOffParams {
+    Editinput2: number;
+    id: string;
+}
+
+async function postPriceOff({ Editinput2, id }: PostPriceOffParams): Promise<PriceOffResponse> {
     try {
-        
-        const res= await fetch('http://localhost:3000/api/POSTpriceoff',{
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({Editinput2,id})
+        const response = await fetch('/api/POSTpriceoff', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ Editinput2, id })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update price off');
         }
-        )
-        if(res.ok){
-           return await res.json()
-    } }catch (error) {
-       
-        return error
-        
+
+        return response.json();
+    } catch (error) {
+        throw new Error('Failed to update price off');
     }
 }
 
-    return useMutation(mutatefunction)
-
-}
+export const useAPostpriceoff = (Editinput2: number, id: string) => {
+    return useMutation({
+        mutationFn: () => postPriceOff({ Editinput2, id }),
+    });
+};

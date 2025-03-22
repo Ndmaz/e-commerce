@@ -1,4 +1,4 @@
-import prisma from "@/lib/database";
+import prisma from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
             brand,
             searchprop
         } = body;
-console.log('this is searchprop',searchprop)
+        console.log('this is searchprop',searchprop)
         // Validate page number
         if (page < 1) {
             return NextResponse.json(
@@ -53,7 +53,7 @@ console.log('this is searchprop',searchprop)
         // Construct where clause based on active filters
         const wherecunstructor = () => {
             // Add price range filter if active
-             // Add search filter if active (case-insensitive)
+            // Add search filter if active (case-insensitive)
             if (searchpropfilterboolean) {
                 where.productname = {
                     contains: searchprop,
@@ -74,7 +74,7 @@ console.log('this is searchprop',searchprop)
             if (brandfilterboolean) {
                 where.brandid = parseFloat(brand);
             }
-           
+
             return where
         }
 

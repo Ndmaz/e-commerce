@@ -1,4 +1,4 @@
-import prisma from "@/lib/database"
+import prisma from "@/lib/prisma"
 
 
 export async function DELETE(req:Request) {
@@ -7,10 +7,10 @@ export async function DELETE(req:Request) {
     const idd=parseFloat(id)
     try {
          const removep= await prisma.product.delete({
-            where:{id:idd}
-            
-         })
-         return Response.json('200')
+            where:{                id:idd}
+           
+        })
+        return Response.json('200')
     } catch (error) {
         Response.error()
     }

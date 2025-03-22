@@ -1,21 +1,31 @@
-import {  useQuery } from "react-query"
+import { useQuery } from "@tanstack/react-query";
 
-export const useAGetbrands=()=>{
-
-    async function queryfunction() {
-
-        try {
-            const res=await fetch('http://localhost:3000/api/getbrand')
-            if(res.ok){
-                const brands=await res.json()
-               const data= brands.brands
-                return data
-            }
-        } catch (error) {
-            return error
-        }
-     
-        
-    }
-    return useQuery('brandkey',queryfunction)
+interface Brand {
+    id: number;
+    name: string;
+    imageUrl?: string;
 }
+
+interface BrandsResponse {
+    brands: Brand[];
+}
+
+async function fetchBrands(): Promise<Brand[]> {
+    try {
+        const response = await fetch('/api/getbrand');
+        if (!response.ok) {
+            throw new Error('Failed to fetch brands');
+        }
+        const data: BrandsResponse = await response.json();
+        return data.brands;
+    } catch (error) {
+        throw new Error('Failed to fetch brands');
+    }
+}
+
+export const useAGetbrands = () => {
+    return useQuery({
+        queryKey: ['brands'],
+        queryFn: fetchBrands,
+    });
+};

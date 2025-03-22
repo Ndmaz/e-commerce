@@ -77,7 +77,7 @@ export default async function AdminLayout({
 }) {
   const session = await getServerSession(authOptions);
 
-  if (/*!session?.user || session.user.role !== 'ADMIN'*/false ) {
+  if (/*!session?.user || session.user.role !== 'ADMIN'*/false) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -89,7 +89,14 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex flex-row-reverse" dir="rtl">
+      {/* Main Content */}
+      <main className="flex-1 p-8">
+        <div className="max-w-7xl mx-auto">
+          {children}
+        </div>
+      </main>
+
       {/* Sidebar */}
       <aside className="w-64 bg-white border-l border-gray-200 flex flex-col">
         <div className="p-4 border-b border-gray-200">
@@ -110,7 +117,7 @@ export default async function AdminLayout({
                       <Link
                         key={child.href}
                         href={child.href}
-                        className="block p-2 text-sm text-gray-600 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                        className="flex justify-start p-2 text-sm text-gray-600 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-colors"
                       >
                         {child.title}
                       </Link>
@@ -133,22 +140,15 @@ export default async function AdminLayout({
         <div className="p-4 border-t border-gray-200">
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-              {session.user.name?.[0] || "A"}
+              {session?.user?.name?.[0] || "A"}
             </div>
             <div>
-              <p className="font-medium">{session.user.name}</p>
+              <p className="font-medium">{session?.user?.name || "کاربر"}</p>
               <p className="text-xs text-gray-500">مدیر سیستم</p>
             </div>
           </div>
         </div>
       </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 p-8">
-        <div className="max-w-7xl mx-auto">
-          {children}
-        </div>
-      </main>
     </div>
   );
 }

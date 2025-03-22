@@ -1,18 +1,16 @@
 "use client";
 import { S3 } from "aws-sdk";
-
 import { CheckIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CgSpinner } from "react-icons/cg";
-
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
-import { useMutation } from "react-query";
-
+import { useMutation } from "@tanstack/react-query";
 import { MdPlaylistAdd } from "react-icons/md";
 import { Card } from "@/components/ui/card";
+import { useToast } from "@/store/use-toast";
 
 interface ProductDetail {
   detailname: string;
@@ -39,38 +37,42 @@ interface ProductFormData {
   permanentLink: ProductImages;
 }
 
-export default function ProductManagement() {
-  // Form state
-  const [formData, setFormData] = useState<ProductFormData>({
-    productname: "",
-    productcode: "",
-    category: "",
-    brand: "",
-    price: "",
-    quanity: "",
-    synopsis: "",
-    description: "",
-    details: [],
-    permanentLink: {
-      pic1: "",
-      pic2: "",
-      pic3: "",
-      pic4: "",
-    },
-  });
+const initialFormState: ProductFormData = {
+  productname: "",
+  productcode: "",
+  category: "",
+  brand: "",
+  price: "",
+  quanity: "",
+  synopsis: "",
+  description: "",
+  details: [],
+  permanentLink: {
+    pic1: "",
+    pic2: "",
+    pic3: "",
+    pic4: "",
+  },
+};
 
-  // UI state
+export default function ProductManagement() {
+  const { toast } = useToast();
+  const [formData, setFormData] = useState(initialFormState);
   const [selectedImageType, setSelectedImageType] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // AWS S3 configuration
   const ACCESSKEY = process.env.NEXT_PUBLIC_LIARA_ACCESS_KEY;
   const SECRETKEY = process.env.NEXT_PUBLIC_LIARA_SECRET_KEY;
   const ENDPOINT = process.env.NEXT_PUBLIC_LIARA_ENDPOINT;
   const BUCKET = process.env.NEXT_PUBLIC_LIARA_BUCKET_NAME;
 
-  // Handle file upload
+  const resetForm = () => {
+    setFormData(initialFormState);
+    setSelectedImageType("");
+    setError("");
+  };
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) {
@@ -78,17 +80,23 @@ export default function ProductManagement() {
       return;
     }
 
-    // Validate file type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
-      setError("فرمت فایل باید jpeg، png یا webp باشد");
+      toast({
+        variant: "destructive",
+        title: "خطا در آپلود",
+        description: "فرمت فایل باید jpeg، png یا webp باشد",
+      });
       return;
     }
 
-    // Validate file size (max 5MB)
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
-      setError("حجم فایل نمی‌تواند بیشتر از ۵ مگابایت باشد");
+      toast({
+        variant: "destructive",
+        title: "خطا در آپلود",
+        description: "حجم فایل نمی‌تواند بیشتر از ۵ مگابایت باشد",
+      });
       return;
     }
 
@@ -112,7 +120,7 @@ export default function ProductManagement() {
       const permanentSignedUrl = await s3.getSignedUrl("getObject", {
         Bucket: BUCKET || "",
         Key: `products/${file.name}`,
-        Expires: 131536000, // 4 years
+        Expires: 131536000,
       });
 
       setFormData(prev => ({
@@ -123,17 +131,23 @@ export default function ProductManagement() {
         }
       }));
 
-      setError("");
+      toast({
+        title: "آپلود موفق",
+        description: "تصویر با موفقیت آپلود شد",
+      });
+
     } catch (error) {
       console.error("Upload error:", error);
-      setError("خطا در آپلود فایل. لطفا دوباره تلاش کنید");
+      toast({
+        variant: "destructive",
+        title: "خطا در آپلود",
+        description: "خطا در آپلود فایل. لطفا دوباره تلاش کنید",
+      });
     }
   };
 
-  // Handle form submission
-  const submitForm = async () => {
-    try {
-      setIsSubmitting(true);
+  const { mutate: submitForm, isLoading } = useMutation({
+    mutationFn: async () => {
       const response = await fetch("/api/product", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -144,43 +158,48 @@ export default function ProductManagement() {
         throw new Error("خطا در ثبت محصول");
       }
 
-      // Reset form
-      setFormData({
-        productname: "",
-        productcode: "",
-        category: "",
-        brand: "",
-        price: "",
-        quanity: "",
-        synopsis: "",
-        description: "",
-        details: [],
-        permanentLink: {
-          pic1: "",
-          pic2: "",
-          pic3: "",
-          pic4: "",
-        },
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "ثبت موفق",
+        description: "محصول با موفقیت ثبت شد",
       });
-      setSelectedImageType("");
-      alert("محصول با موفقیت ثبت شد");
-    } catch (error) {
-      console.error(error);
-      setError("خطا در ثبت محصول. لطفا دوباره تلاش کنید");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const { mutate } = useMutation(submitForm);
+      resetForm();
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "خطا",
+        description: error instanceof Error ? error.message : "خطا در ثبت محصول",
+      });
+    },
+  });
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    mutate();
+    submitForm();
+  };
+
+  const addDetail = () => {
+    const lastDetail = formData.details[formData.details.length - 1];
+    if (lastDetail?.detailname && lastDetail?.detailvalue) {
+      setFormData(prev => ({
+        ...prev,
+        details: [...prev.details, { detailname: "", detailvalue: "" }]
+      }));
+    }
+  };
+
+  const removeDetail = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      details: prev.details.filter((_, i) => i !== index)
+    }));
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
+    <div className="max-w-3xl mx-auto p-6" dir="rtl">
       <Card className="p-6">
         <div className="space-y-6">
           <div>
@@ -191,78 +210,28 @@ export default function ProductManagement() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="p-3 bg-red-50 text-red-600 rounded-md">
-                {error}
-              </div>
-            )}
-
-            {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="productname">نام محصول</Label>
-                <Input
-                  id="productname"
-                  value={formData.productname}
-                  onChange={(e) => setFormData(prev => ({ ...prev, productname: e.target.value }))}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="productcode">کد محصول</Label>
-                <Input
-                  id="productcode"
-                  value={formData.productcode}
-                  onChange={(e) => setFormData(prev => ({ ...prev, productcode: e.target.value }))}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="category">دسته‌بندی</Label>
-                <Input
-                  id="category"
-                  value={formData.category}
-                  onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="brand">برند</Label>
-                <Input
-                  id="brand"
-                  value={formData.brand}
-                  onChange={(e) => setFormData(prev => ({ ...prev, brand: e.target.value }))}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="price">قیمت</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  value={formData.price}
-                  onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="quanity">تعداد</Label>
-                <Input
-                  id="quanity"
-                  type="number"
-                  value={formData.quanity}
-                  onChange={(e) => setFormData(prev => ({ ...prev, quanity: e.target.value }))}
-                  required
-                />
-              </div>
+              {[
+                { id: "productname", label: "نام محصول", type: "text" },
+                { id: "productcode", label: "کد محصول", type: "text" },
+                { id: "category", label: "دسته‌بندی", type: "text" },
+                { id: "brand", label: "برند", type: "text" },
+                { id: "price", label: "قیمت", type: "number" },
+                { id: "quanity", label: "تعداد", type: "number" },
+              ].map(({ id, label, type }) => (
+                <div key={id} className="space-y-2">
+                  <Label htmlFor={id}>{label}</Label>
+                  <Input
+                    id={id}
+                    type={type}
+                    value={formData[id as keyof typeof formData] as string}
+                    onChange={(e) => setFormData(prev => ({ ...prev, [id]: e.target.value }))}
+                    required
+                  />
+                </div>
+              ))}
             </div>
 
-            {/* Description */}
             <div className="space-y-2">
               <Label htmlFor="synopsis">توضیح کوتاه</Label>
               <Textarea
@@ -283,7 +252,6 @@ export default function ProductManagement() {
               />
             </div>
 
-            {/* Product Details */}
             <div className="space-y-4">
               <Label>مشخصات محصول</Label>
               <div className="flex gap-2">
@@ -315,22 +283,13 @@ export default function ProductManagement() {
                 />
                 <Button
                   type="button"
-                  onClick={() => {
-                    if (formData.details[formData.details.length - 1]?.detailname &&
-                      formData.details[formData.details.length - 1]?.detailvalue) {
-                      setFormData(prev => ({
-                        ...prev,
-                        details: [...prev.details, { detailname: "", detailvalue: "" }]
-                      }));
-                    }
-                  }}
+                  onClick={addDetail}
                 >
                   <MdPlaylistAdd className="ml-2" />
                   افزودن
                 </Button>
               </div>
 
-              {/* Display added details */}
               <div className="space-y-2">
                 {formData.details.map((detail, index) => (
                   <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
@@ -340,12 +299,7 @@ export default function ProductManagement() {
                       type="button"
                       variant="ghost"
                       size="sm"
-                      onClick={() => {
-                        setFormData(prev => ({
-                          ...prev,
-                          details: prev.details.filter((_, i) => i !== index)
-                        }));
-                      }}
+                      onClick={() => removeDetail(index)}
                     >
                       حذف
                     </Button>
@@ -354,7 +308,6 @@ export default function ProductManagement() {
               </div>
             </div>
 
-            {/* Image Upload */}
             <div className="space-y-4">
               <Label>تصاویر محصول</Label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -374,7 +327,7 @@ export default function ProductManagement() {
                         onChange={(e) => setSelectedImageType(e.target.value)}
                       />
                       <Label>{label}</Label>
-                      {formData.permanentLink[key as keyof ProductImages] && (
+                      {formData.permanentLink[key as keyof typeof formData.permanentLink] && (
                         <CheckIcon className="text-green-500" />
                       )}
                     </div>
@@ -389,13 +342,12 @@ export default function ProductManagement() {
               </div>
             </div>
 
-            {/* Submit Button */}
             <Button
               type="submit"
               className="w-full"
-              disabled={isSubmitting}
+              disabled={isLoading}
             >
-              {isSubmitting ? (
+              {isLoading ? (
                 <>
                   <CgSpinner className="animate-spin ml-2" />
                   در حال ثبت...

@@ -21,8 +21,12 @@ export default function SearchFunction({ searchValue }: SearchFunctionProps) {
   const selectedProduct = usePE((state) => state.selectedProduct);
   const setSelectedProduct = usePE((state) => state.setSelectedProduct);
 
-  const { data: products, isLoading, error, isError } = useAPE(searchValue);
+  // Only trigger search if we have a valid search value
+  const { data: products, isLoading, error, isError } = useAPE(
+    searchValue.trim() 
+  );
 
+  // Show loading state
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -31,6 +35,7 @@ export default function SearchFunction({ searchValue }: SearchFunctionProps) {
     );
   }
 
+  // Show error state
   if (isError) {
     return (
       <Card className="p-6">
@@ -41,11 +46,14 @@ export default function SearchFunction({ searchValue }: SearchFunctionProps) {
     );
   }
 
+  // Show no results state
   if (!products || products.length === 0) {
     return (
       <Card className="p-6">
         <div className="text-center text-gray-500">
-          محصولی با این نام یافت نشد
+          {searchValue.trim()
+            ? "محصولی با این نام یافت نشد"
+            : "لطفا یک عبارت برای جستجو وارد کنید"}
         </div>
       </Card>
     );

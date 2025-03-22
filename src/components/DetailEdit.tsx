@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import { CgSpinner } from "react-icons/cg";
 import { CheckIcon } from "@radix-ui/react-icons";
 import { Product, ProductDetail } from "@/types/product";

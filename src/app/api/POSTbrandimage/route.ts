@@ -1,9 +1,9 @@
-import prisma from "@/lib/database"
+import prisma from "@/lib/prisma"
 
 
 
 export async function POST(req: Request) {
-
+    
     const {brandvalue,brandimageurl} = await req.json()
     const id = parseFloat(brandvalue)
     try {
@@ -13,10 +13,10 @@ export async function POST(req: Request) {
                 id: id
             },
             data: {
-               brandimage: brandimageurl
+                brandimage: brandimageurl
             }
         })
-        return Response.json({ brand })
+        return Response.json({             brand })
 
     } catch (error) {
         

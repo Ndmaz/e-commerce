@@ -3,39 +3,60 @@ import { Product } from "@/types/product";
 import prisma from "@/lib/prisma";
 
 
-interface SearchRequest {
-    searchValue: string;
-}
 
-export async function POST(request: Request) {
+
+export async function POST(req: Request) {
     try {
-        const body: SearchRequest = await request.json();
-        const { searchValue } = body;
+        const { searchValue } = await req.json();
 
-        if (!searchValue?.trim()) {
+        if (!searchValue) {
             return NextResponse.json(
-                { message: "لطفا نام محصول را وارد کنید" },
+                { message: "Search term is required" },
                 { status: 400 }
             );
         }
 
         const products = await prisma.product.findMany({
             where: {
-                productname: {
-                    contains: searchValue,
-                    mode: "insensitive",
-                },
+                OR: [
+                    {
+                        productname: {
+                            contains: searchValue,
+                            mode: 'insensitive'
+                        }
+                    },
+                    {
+                        productcode: {
+                            contains: searchValue,
+                            mode: 'insensitive'
+                        }
+                    },
+                    {
+                        synopsis: {
+                            contains: searchValue,
+                            mode: 'insensitive'
+                        }
+                    }
+                ]
             },
-            take: 10, // Limit to 10 results
             include: {
-                category: true,
-                brand: true,
+                category: {
+                    select: {
+                        name: true
+                    }
+                },
+                brand: {
+                    select: {
+                        name: true
+                    }
+                }
             },
+            take: 10
         });
 
-        if (!products || products.length === 0) {
+        if (!products.length) {
             return NextResponse.json(
-                { message: "محصولی با این نام یافت نشد" },
+                { message: "No products found matching your search" },
                 { status: 404 }
             );
         }
@@ -63,9 +84,9 @@ export async function POST(request: Request) {
 
         return NextResponse.json({ products: parsedProducts });
     } catch (error) {
-        console.error("Product search error:", error);
+        console.error("Error searching products:", error);
         return NextResponse.json(
-            { message: "خطا در جستجوی محصول" },
+            { message: "Error searching products" },
             { status: 500 }
         );
     }

@@ -121,8 +121,8 @@ export default function Cart() {
                           </button>
                         </div>
                       </td>
-                      <td className="py-4 px-4">{product.price.toLocaleString()} تومان</td>
-                      <td className="py-4 px-4">{productTotal.toLocaleString()} تومان</td>
+                      <td className="py-4 px-4">{product.price} تومان</td>
+                      <td className="py-4 px-4">{productTotal} تومان</td>
                       <td className="py-4 px-4">
                         <button
                           onClick={() => handleRemoveProduct(product.id)}
@@ -141,7 +141,7 @@ export default function Cart() {
           <div className="mt-8 border-t pt-6">
             <div className="flex justify-between items-center mb-6">
               <span className="text-lg font-medium">جمع کل:</span>
-              <span className="text-xl font-bold">{totalPrice.toLocaleString()} تومان</span>
+              <span className="text-xl font-bold">{totalPrice} تومان</span>
             </div>
 
             {error && (
