@@ -4,18 +4,30 @@ import prisma from "@/lib/prisma";
 export async function POST(req: Request) {
     try {
         const { imageUrl } = await req.json();
-
+        console.log(imageUrl)
         if (!imageUrl) {
             return NextResponse.json(
                 { message: "Image URL is required" },
                 { status: 400 }
             );
         }
-
+        if (typeof imageUrl == 'string') {
+            console.log('its string')
+        } else {
+            console.log('its',typeof imageUrl)
+        }
         // Try to update any existing record, or create a new one
-        const general = await prisma.general.create({
-            data: {
+        const general = await prisma.general.upsert({
+            where:{
+                id:1
+            },
+            update:{
+                mainpageimage:imageUrl
+            },
+            create: {
+                id:1,
                 mainpageimage: imageUrl,
+                name:"",
                 description: "",
                 logoimage: "",
                 contactinfo: "",

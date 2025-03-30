@@ -81,7 +81,8 @@ model Order {
 }
 
 model General {
-  id                     Int    @id @unique @default(autoincrement())
+  id                     Int    @id @default(autoincrement())
+  name                   String @unique
   description            String
   mainpageimage          String
   logoimage              String

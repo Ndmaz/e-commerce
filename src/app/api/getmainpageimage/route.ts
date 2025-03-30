@@ -4,10 +4,11 @@ import prisma from "@/lib/prisma";
 export async function GET() {
     try {
         const general = await prisma.general.findFirst({
+            where: { id: 1 },
             select: {
                 mainpageimage: true
             }
-        });
+        })
 
         if (!general?.mainpageimage) {
             return NextResponse.json(
