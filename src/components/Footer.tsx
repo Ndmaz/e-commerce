@@ -4,20 +4,18 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { FiPhone, FiMail, FiMapPin, FiInstagram, FiTwitter } from 'react-icons/fi';
 import { FaTelegram } from 'react-icons/fa';
+import { useFooterInfo } from '@/store/AsyncStore/useFooterInfo';
+import { useGeneralData } from '@/store/AsyncStore/useGeneralData';
+import { CgSpinner } from "react-icons/cg";
 
 const footerLinks = {
   quickLinks: [
     { label: 'صفحه اصلی', href: '/' },
     { label: 'محصولات', href: '/products' },
     { label: 'درباره ما', href: '/about' },
-    { label: 'تماس با ما', href: '/contact' },
+    { label: 'پنل کاربری', href: '/panel' },
   ],
-  categories: [
-    { label: 'کوهنوردی', href: '/products?category=hiking' },
-    { label: 'کمپینگ', href: '/products?category=camping' },
-    { label: 'لوازم فنی', href: '/products?category=technical' },
-    { label: 'پوشاک', href: '/products?category=clothing' },
-  ],
+
   support: [
     { label: 'راهنمای خرید', href: '/guide' },
     { label: 'شرایط بازگشت', href: '/returns' },
@@ -27,6 +25,23 @@ const footerLinks = {
 } as const;
 
 export default function Footer() {
+  const { data: footerData, isLoading: isLoadingFooter, error: footerError } = useFooterInfo();
+  const { data: generalData, isLoading: isLoadingGeneral } = useGeneralData();
+
+  if (isLoadingFooter || isLoadingGeneral) {
+    return (
+      <div className="flex justify-center items-center h-40">
+        <CgSpinner className="animate-spin text-4xl text-gray-400" />
+      </div>
+    );
+  }
+
+  if (footerError || !footerData || !generalData) {
+    return null;
+  }
+
+  const { contactInfo, socialMedia } = footerData;
+
   return (
     <footer className="bg-gray-900 text-gray-300" dir="rtl">
       <div className="container mx-auto px-4 py-12">
@@ -35,29 +50,40 @@ export default function Footer() {
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 relative">
-                <Image
-                  src="/logo.png"
-                  alt="Mountaineering Logo"
-                  fill
-                  className="object-contain"
-                />
+                {generalData.logoimage ? (
+                  <Image
+                    src={generalData.logoimage}
+                    alt="Logo"
+                    fill
+                    className="object-contain"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+                    <span className="text-xs text-gray-400">لوگو</span>
+                  </div>
+                )}
               </div>
               <h3 className="text-xl font-bold text-white">کوهنوردی</h3>
             </div>
             <p className="text-sm leading-relaxed">
-              ارائه دهنده بهترین تجهیزات کوهنوردی و طبیعت‌گردی
-              با کیفیت برتر و قیمت مناسب
+              {generalData.description || 'ارائه دهنده بهترین تجهیزات کوهنوردی و طبیعت‌گردی با کیفیت برتر و قیمت مناسب'}
             </p>
             <div className="flex items-center gap-4 pt-2">
-              <a href="#" className="hover:text-blue-400 transition-colors">
-                <FiInstagram className="text-xl" />
-              </a>
-              <a href="#" className="hover:text-blue-400 transition-colors">
-                <FaTelegram className="text-xl" />
-              </a>
-              <a href="#" className="hover:text-blue-400 transition-colors">
-                <FiTwitter className="text-xl" />
-              </a>
+              {socialMedia.instagram && (
+                <a href={socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors">
+                  <FiInstagram className="text-xl" />
+                </a>
+              )}
+              {socialMedia.telegram && (
+                <a href={socialMedia.telegram} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors">
+                  <FaTelegram className="text-xl" />
+                </a>
+              )}
+              {socialMedia.twitter && (
+                <a href={socialMedia.twitter} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors">
+                  <FiTwitter className="text-xl" />
+                </a>
+              )}
             </div>
           </div>
 
@@ -78,39 +104,28 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Categories */}
-          <div>
-            <h3 className="text-lg font-semibold text-white mb-4">دسته‌بندی‌ها</h3>
-            <ul className="space-y-2">
-              {footerLinks.categories.map(({ label, href }) => (
-                <li key={href}>
-                  <Link
-                    href={href}
-                    className="hover:text-blue-400 transition-colors text-sm"
-                  >
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
           {/* Contact Info */}
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">اطلاعات تماس</h3>
             <ul className="space-y-3">
-              <li className="flex items-center gap-2 text-sm">
-                <FiPhone className="text-blue-400" />
-                <span>۰۲۱-۱۲۳۴۵۶۷۸</span>
-              </li>
-              <li className="flex items-center gap-2 text-sm">
-                <FiMail className="text-blue-400" />
-                <span>info@mountaineering.com</span>
-              </li>
-              <li className="flex items-center gap-2 text-sm">
-                <FiMapPin className="text-blue-400" />
-                <span>تهران، خیابان ولیعصر، مرکز خرید کوهنوردی</span>
-              </li>
+              {contactInfo.phone && (
+                <li className="flex items-center gap-2 text-sm">
+                  <FiPhone className="text-blue-400" />
+                  <span>{contactInfo.phone}</span>
+                </li>
+              )}
+              {contactInfo.email && (
+                <li className="flex items-center gap-2 text-sm">
+                  <FiMail className="text-blue-400" />
+                  <span>{contactInfo.email}</span>
+                </li>
+              )}
+              {contactInfo.address && (
+                <li className="flex items-center gap-2 text-sm">
+                  <FiMapPin className="text-blue-400" />
+                  <span>{contactInfo.address}</span>
+                </li>
+              )}
             </ul>
           </div>
         </div>

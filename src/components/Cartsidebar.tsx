@@ -4,14 +4,20 @@ import { useHeaders } from "@/store/useheaders";
 import Link from "next/link";
 import { BsCartDash, BsCartX } from "react-icons/bs";
 import { IoCartOutline } from "react-icons/io5";
+import { FaImage } from "react-icons/fa";
 import Image from "next/image";
-import pic from "@/app/1.jpg";
 import { useState, useEffect } from "react";
 
+type CartProduct = {
+  id: string;
+  productname: string;
+  price: number;
+  images: string;
+};
 
 export default function Cartsidebar() {
   const cartbooleanchange = useHeaders((state) => state.cartbooleanchange);
-  const products = useCartproducts((state) => state.products);
+  const products = useCartproducts((state) => state.products) as unknown as CartProduct[];
   const productschange = useCartproducts((state) => state.productschange);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -73,6 +79,7 @@ export default function Cartsidebar() {
             products.map((item) => {
               const images = JSON.parse(item.images);
               const hasImages = item.images !== `{"pic1":"","pic2":"","pic3":"","pic4":""}`;
+              const productImage = hasImages ? images.pic1 : null;
 
               return (
                 <div
@@ -80,13 +87,19 @@ export default function Cartsidebar() {
                   className="p-4 border-b hover:bg-gray-50 transition-colors duration-200"
                 >
                   <div className="flex items-start space-x-4 space-x-reverse">
-                    <Image
-                      src={hasImages ? images.pic1 : pic}
-                      width={300}
-                      height={200}
-                      alt={item.productname}
-                      className="w-24 h-24 object-cover rounded-lg"
-                    />
+                    <div className="w-24 h-24 bg-gray-50 rounded-lg overflow-hidden flex items-center justify-center">
+                      {productImage ? (
+                        <Image
+                          src={productImage}
+                          width={300}
+                          height={200}
+                          alt={item.productname}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <FaImage className="w-8 h-8 text-gray-400" />
+                      )}
+                    </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-lg font-medium text-gray-900 truncate">
                         {item.productname}

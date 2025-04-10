@@ -1,6 +1,6 @@
 import Image from "next/image";
-import pic from "@/app/1.jpg";
 import { useMemo } from "react";
+import { FaImage } from "react-icons/fa";
 
 type ProductCardProps = {
   productname: string;
@@ -21,9 +21,9 @@ export default function ProductCard({
   const productImage = useMemo(() => {
     try {
       const parsedImages = JSON.parse(images);
-      return parsedImages?.pic1 || pic;
+      return parsedImages?.pic1 || null;
     } catch {
-      return pic;
+      return null;
     }
   }, [images]);
 
@@ -49,13 +49,19 @@ export default function ProductCard({
 
       {/* Image Container */}
       <div className="aspect-square overflow-hidden bg-gray-50">
-        <Image
-          src={productImage}
-          width={400}
-          height={400}
-          alt={productname}
-          className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
-        />
+        {productImage ? (
+          <Image
+            src={productImage}
+            width={400}
+            height={400}
+            alt={productname}
+            className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <FaImage className="w-16 h-16 text-gray-400" />
+          </div>
+        )}
       </div>
 
       {/* Product Info */}

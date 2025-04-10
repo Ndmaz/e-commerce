@@ -2,6 +2,7 @@ import React, { useCallback, useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { usePPD } from "@/store/usePPD";
 import { IoIosArrowDropleft, IoIosArrowDropright } from "react-icons/io";
+import { FaImage } from "react-icons/fa";
 import Image from "next/image";
 import pic from "@/app/1.jpg";
 import { useCartproducts } from "@/store/useCartproducts";
@@ -10,28 +11,33 @@ import type { EmblaCarouselType } from "embla-carousel";
 import { toast } from "@/store/use-toast";
 
 type ProductInfo = {
-  id: string;
+  id: number;
   productname: string;
-  price: number;
-  synopsis: string;
-  images: string;
+  productcode?: string;
+  synopsis?: string;
+  description?: string;
+  details?: string;
+  price?: number;
+  priceoff?: number;
+  quanity?: number;
+  images?: string;
+  categoryid: number;
+  brandid: number;
 }
 
 export default function ProductDisone() {
-  const mainCarouselOptions = {
-    align: 'start',
-    containScroll: false,
-    dragFree: false,
+  const [emblaMainRef, emblaMainApi] = useEmblaCarousel({
+   
+    dragFree: true,
     loop: true
-  } as const;
-
-  const [emblaMainRef, emblaMainApi] = useEmblaCarousel(mainCarouselOptions);
+  });
   const [emblaThumbRef, emblaThumbApi] = useEmblaCarousel({
     containScroll: 'keepSnaps',
     dragFree: true,
     align: 'start'
   });
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [loadedImages, setLoadedImages] = useState<number[]>([0]);
 
   const productInfo = usePPD((state) => state.productinfo) as ProductInfo;
   const { products, productschange: setProducts } = useCartproducts((state) => ({
@@ -41,6 +47,8 @@ export default function ProductDisone() {
 
   // Parse and validate images
   const images = (() => {
+    if (!productInfo.images) return [];
+
     try {
       const parsed = JSON.parse(productInfo.images);
       if (parsed && typeof parsed === 'object') {
@@ -49,12 +57,12 @@ export default function ProductDisone() {
           .map(key => parsed[key])
           .filter(url => url && url !== "");
 
-        return imageEntries.length > 0 ? imageEntries : [pic];
+        return imageEntries.length > 0 ? imageEntries : [];
       }
     } catch (e) {
       console.error('Error parsing images:', e);
     }
-    return [pic];
+    return [];
   })();
 
   const scrollPrev = useCallback(() => {
@@ -68,12 +76,15 @@ export default function ProductDisone() {
   const onThumbClick = useCallback((index: number) => {
     if (!emblaMainApi || !emblaThumbApi) return;
     emblaMainApi.scrollTo(index);
+    setLoadedImages(prev => [...prev, index]);
   }, [emblaMainApi, emblaThumbApi]);
 
   // Update selectedIndex when carousel scrolls
   const onSelect = useCallback(() => {
     if (!emblaMainApi) return;
-    setSelectedIndex(emblaMainApi.selectedScrollSnap());
+    const newIndex = emblaMainApi.selectedScrollSnap();
+    setSelectedIndex(newIndex);
+    setLoadedImages(prev => [...prev, newIndex]);
   }, [emblaMainApi]);
 
   // Subscribe to carousel select event
@@ -86,6 +97,33 @@ export default function ProductDisone() {
       emblaMainApi.off('select', onSelect);
     };
   }, [emblaMainApi, onSelect, images]);
+
+  // handle carousel reinitialization when images change
+  useEffect(() => {
+    if (emblaMainApi) emblaMainApi.reInit();
+    if (emblaThumbApi) emblaThumbApi.reInit();
+  }, [images, emblaMainApi, emblaThumbApi]); // Re-init when images array changes
+
+
+  // Preload next and previous images
+  useEffect(() => {
+    if (!emblaMainApi) return;
+
+    const preloadImages = () => {
+      const currentIndex = emblaMainApi.selectedScrollSnap();
+      const nextIndex = (currentIndex + 1) % images.length;
+      const prevIndex = (currentIndex - 1 + images.length) % images.length;
+
+      setLoadedImages(prev => [...prev, currentIndex, nextIndex, prevIndex]);
+    };
+
+    preloadImages();
+    emblaMainApi.on('select', preloadImages);
+
+    return () => {
+      emblaMainApi.off('select', preloadImages);
+    };
+  }, [emblaMainApi, images.length]);
 
   const handleAddToCart = () => {
     if (products.some(item => item.id === productInfo.id)) {
@@ -106,7 +144,7 @@ export default function ProductDisone() {
       description: "محصول با موفقیت اضافه شد",
     });
   };
-
+  const isImageLoaded = (index: number) => loadedImages.includes(index);
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="bg-white rounded-xl shadow-lg p-6 grid grid-cols-1 md:grid-cols-2 gap-8" dir="rtl">
@@ -116,18 +154,26 @@ export default function ProductDisone() {
           <div className="relative rounded-lg overflow-hidden bg-gray-100">
             <div ref={emblaMainRef} className="overflow-hidden">
               <div className="flex">
-                {images.map((url, index) => (
-                  <div key={`main-${index}`} className="flex-[0_0_100%] min-w-0 relative aspect-square">
-                    <Image
-                      src={url}
-                      fill
-                      priority={index === 0}
-                      alt={`تصویر ${index + 1} محصول`}
-                      className="object-contain"
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                    />
+                {images.length > 0 ? (
+                  images.map((url, index) => (
+                    <div key={`main-${index}`} className="flex-[0_0_100%] min-w-0 relative aspect-square">
+                      {isImageLoaded(index) && (
+                        <Image
+                          src={url}
+                          fill
+                          priority={index === 0}
+                          alt={`تصویر ${index + 1} محصول`}
+                          className="object-contain"
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                        />
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex-[0_0_100%] min-w-0 relative aspect-square flex items-center justify-center">
+                    <FaImage className="w-24 h-24 text-gray-400" />
                   </div>
-                ))}
+                )}
               </div>
             </div>
 
@@ -198,7 +244,7 @@ export default function ProductDisone() {
                 قیمت:
               </span>
               <span className="text-2xl font-bold text-blue-600">
-                {new Intl.NumberFormat('fa-IR').format(productInfo.price)} تومان
+                {productInfo.price ? new Intl.NumberFormat('fa-IR').format(productInfo.price) : 'قیمت موجود نیست'} تومان
               </span>
             </div>
 

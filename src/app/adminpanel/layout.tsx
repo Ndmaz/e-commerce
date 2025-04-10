@@ -37,6 +37,8 @@ const navItems: NavItem[] = [
       { title: "عکس زمینه", href: "/adminpanel/Mainpageimage" },
       { title: "تغییرات دسته بندی", href: "/adminpanel/Categoryfilter" },
       { title: "تغییرات برند", href: "/adminpanel/Brandfilter" },
+      { title: "تغییرات فوتر", href: "/adminpanel/Footerinfo" },
+      { title: "تغییرات لوگو", href: "/adminpanel/Logo" },
     ],
   },
   {

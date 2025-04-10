@@ -1,10 +1,10 @@
 import { useAPRELATED } from "@/store/AsyncStore/useAPRELATED";
 import { usePPD } from "@/store/usePPD";
 import Image from "next/image";
-import pic from "@/app/1.jpg";
 import Link from "next/link";
 import { CgSpinner } from "react-icons/cg";
 import { MdKeyboardDoubleArrowLeft } from "react-icons/md";
+import { FaImage } from "react-icons/fa";
 import { useparameters } from "@/store/useparameters";
 
 type ProductInfo = {
@@ -38,9 +38,9 @@ export default function RelatedCarousel() {
   const getProductImage = (imageString: string) => {
     try {
       const images = JSON.parse(imageString);
-      return images && images.pic1 ? images.pic1 : pic;
+      return images?.pic1 || null;
     } catch {
-      return pic;
+      return null;
     }
   };
 
@@ -68,33 +68,42 @@ export default function RelatedCarousel() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        {relatedProducts.map((product) => (
-          <Link
-            key={product.id}
-            href={`/products/${product.id}`}
-            className="group bg-white rounded-xl shadow-sm hover:shadow-md 
-                     transition-all duration-200 overflow-hidden"
-          >
-            <div className="aspect-square overflow-hidden bg-gray-100">
-              <Image
-                src={getProductImage(product.images)}
-                width={400}
-                height={400}
-                alt={product.productname}
-                className="w-full h-full object-cover group-hover:scale-105 
-                         transition-transform duration-300"
-              />
-            </div>
-            <div className="p-4">
-              <h3 className="font-medium text-gray-900 truncate">
-                {product.productname}
-              </h3>
-              <p className="mt-2 text-lg font-bold text-blue-600">
-                {new Intl.NumberFormat('fa-IR').format(product.price)} تومان
-              </p>
-            </div>
-          </Link>
-        ))}
+        {relatedProducts.map((product) => {
+          const productImage = getProductImage(product.images);
+          return (
+            <Link
+              key={product.id}
+              href={`/products/${product.id}`}
+              className="group bg-white rounded-xl shadow-sm hover:shadow-md 
+                       transition-all duration-200 overflow-hidden"
+            >
+              <div className="aspect-square overflow-hidden bg-gray-100">
+                {productImage ? (
+                  <Image
+                    src={productImage}
+                    width={400}
+                    height={400}
+                    alt={product.productname}
+                    className="w-full h-full object-cover group-hover:scale-105 
+                             transition-transform duration-300"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <FaImage className="w-12 h-12 text-gray-400" />
+                  </div>
+                )}
+              </div>
+              <div className="p-4">
+                <h3 className="font-medium text-gray-900 truncate">
+                  {product.productname}
+                </h3>
+                <p className="mt-2 text-lg font-bold text-blue-600">
+                  {new Intl.NumberFormat('fa-IR').format(product.price)} تومان
+                </p>
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </section>
   );

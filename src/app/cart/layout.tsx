@@ -23,6 +23,14 @@ export default function CartLayout({ children }: { children: React.ReactNode }) 
 
                             return (
                                 <div key={step.id} className="flex items-center">
+                                  
+
+                                    {/* Step Title */}
+                                    <div className="mr-4">
+                                        <p className={`text-sm font-medium ${isActive ? 'text-blue-600' : 'text-gray-500'}`}>
+                                            {step.title}
+                                        </p>
+                                    </div>
                                     {/* Step Circle */}
                                     <div
                                         className={`flex items-center justify-center w-10 h-10 rounded-full border-2 
@@ -34,14 +42,6 @@ export default function CartLayout({ children }: { children: React.ReactNode }) 
                                     >
                                         <span className="text-sm font-medium">{step.id}</span>
                                     </div>
-
-                                    {/* Step Title */}
-                                    <div className="mr-4">
-                                        <p className={`text-sm font-medium ${isActive ? 'text-blue-600' : 'text-gray-500'}`}>
-                                            {step.title}
-                                        </p>
-                                    </div>
-
                                     {/* Connector Line */}
                                     {index < steps.length - 1 && (
                                         <div className="w-24 mx-4 h-0.5 bg-gray-200">

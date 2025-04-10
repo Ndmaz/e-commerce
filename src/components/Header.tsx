@@ -13,6 +13,8 @@ import Searchsidebar from "./Searchsidebar";
 import { useCartproducts } from "@/store/useCartproducts";
 import { useEffect } from "react";
 import Image from "next/image";
+import { useGeneralData } from "@/store/AsyncStore/useGeneralData";
+import { CgSpinner } from "react-icons/cg";
 
 const navLinks = [
   { href: "/", label: "خانه", icon: RiHome3Line },
@@ -38,6 +40,9 @@ function Header() {
     products: state.products,
     productchange: state.productschange,
   }));
+
+  // Replace the existing useQuery with the new hook
+  const { data: generalData, isLoading: isLoadingLogo } = useGeneralData();
 
   useEffect(() => {
     const loadCartProducts = () => {
@@ -108,12 +113,22 @@ function Header() {
             {/* Logo */}
             <Link href="/" className="flex items-center">
               <div className="w-12 h-12 relative">
-                <Image
-                  src=""
-                  alt="Logo"
-                  fill
-                  className="object-contain"
-                />
+                {isLoadingLogo ? (
+                  <div className="flex items-center justify-center w-full h-full">
+                    <CgSpinner className="animate-spin text-gray-400" />
+                  </div>
+                ) : generalData?.logoimage ? (
+                  <Image
+                    src={generalData.logoimage}
+                    alt="Logo"
+                    fill
+                    className="object-contain rounded-sm"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 text-xs">
+                    لوگو
+                  </div>
+                )}
               </div>
             </Link>
           </div>

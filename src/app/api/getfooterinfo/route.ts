@@ -6,11 +6,7 @@ export async function GET() {
     const general = await prisma.general.findFirst({
       where: { id: 1 },
       select: {
-        description: true,
-        logoimage: true,
         contactinfo: true,
-        socialmedia: true,
-        footerlinks: true
       }
     });
 
@@ -21,17 +17,12 @@ export async function GET() {
       );
     }
 
-    // Parse the JSON strings back to objects
-    const contactInfo = JSON.parse(general.contactinfo || '{}');
-    const socialMedia = JSON.parse(general.socialmedia || '{}');
-    const footerLinks = JSON.parse(general.footerlinks || '{}');
+    // Parse the combined JSON string back to object
+    const parsedData = JSON.parse(general.contactinfo || '{}');
 
     return NextResponse.json({
-      description: general.description,
-      logoImage: general.logoimage,
-      contactInfo,
-      socialMedia,
-      footerLinks
+      contactInfo: parsedData.contactinfo || {},
+      socialMedia: parsedData.socialmedia || {}
     });
 
   } catch (error) {

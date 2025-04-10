@@ -13,7 +13,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
     const session = await getServerSession(authOptions)
     
     // Temporary override - replace with real role check
-    const isAdmin = true
+    const isAdmin = (session?.user.role === 'ADMIN') 
 
     if (isAdmin) {
         return (
