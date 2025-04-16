@@ -1,14 +1,12 @@
-import React, { useCallback, useState, useEffect } from "react";
+'use client'
+import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { usePPD } from "@/store/usePPD";
-import { IoIosArrowDropleft, IoIosArrowDropright } from "react-icons/io";
 import { FaImage } from "react-icons/fa";
 import Image from "next/image";
-import pic from "@/app/1.jpg";
 import { useCartproducts } from "@/store/useCartproducts";
-import useEmblaCarousel from "embla-carousel-react";
-import type { EmblaCarouselType } from "embla-carousel";
 import { toast } from "@/store/use-toast";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
 type ProductInfo = {
   id: number;
@@ -26,16 +24,6 @@ type ProductInfo = {
 }
 
 export default function ProductDisone() {
-  const [emblaMainRef, emblaMainApi] = useEmblaCarousel({
-   
-    dragFree: true,
-    loop: true
-  });
-  const [emblaThumbRef, emblaThumbApi] = useEmblaCarousel({
-    containScroll: 'keepSnaps',
-    dragFree: true,
-    align: 'start'
-  });
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [loadedImages, setLoadedImages] = useState<number[]>([0]);
 
@@ -65,65 +53,20 @@ export default function ProductDisone() {
     return [];
   })();
 
-  const scrollPrev = useCallback(() => {
-    if (emblaMainApi) emblaMainApi.scrollPrev();
-  }, [emblaMainApi]);
+  const handlePrev = () => {
+    setSelectedIndex((prev) => (prev - 1 + images.length) % images.length);
+    setLoadedImages(prev => [...prev, (selectedIndex - 1 + images.length) % images.length]);
+  };
 
-  const scrollNext = useCallback(() => {
-    if (emblaMainApi) emblaMainApi.scrollNext();
-  }, [emblaMainApi]);
+  const handleNext = () => {
+    setSelectedIndex((prev) => (prev + 1) % images.length);
+    setLoadedImages(prev => [...prev, (selectedIndex + 1) % images.length]);
+  };
 
-  const onThumbClick = useCallback((index: number) => {
-    if (!emblaMainApi || !emblaThumbApi) return;
-    emblaMainApi.scrollTo(index);
+  const handleThumbnailClick = (index: number) => {
+    setSelectedIndex(index);
     setLoadedImages(prev => [...prev, index]);
-  }, [emblaMainApi, emblaThumbApi]);
-
-  // Update selectedIndex when carousel scrolls
-  const onSelect = useCallback(() => {
-    if (!emblaMainApi) return;
-    const newIndex = emblaMainApi.selectedScrollSnap();
-    setSelectedIndex(newIndex);
-    setLoadedImages(prev => [...prev, newIndex]);
-  }, [emblaMainApi]);
-
-  // Subscribe to carousel select event
-  useEffect(() => {
-    if (!emblaMainApi) return;
-    onSelect();
-    emblaMainApi.on('select', onSelect);
-    emblaMainApi.reInit();
-    return () => {
-      emblaMainApi.off('select', onSelect);
-    };
-  }, [emblaMainApi, onSelect, images]);
-
-  // handle carousel reinitialization when images change
-  useEffect(() => {
-    if (emblaMainApi) emblaMainApi.reInit();
-    if (emblaThumbApi) emblaThumbApi.reInit();
-  }, [images, emblaMainApi, emblaThumbApi]); // Re-init when images array changes
-
-
-  // Preload next and previous images
-  useEffect(() => {
-    if (!emblaMainApi) return;
-
-    const preloadImages = () => {
-      const currentIndex = emblaMainApi.selectedScrollSnap();
-      const nextIndex = (currentIndex + 1) % images.length;
-      const prevIndex = (currentIndex - 1 + images.length) % images.length;
-
-      setLoadedImages(prev => [...prev, currentIndex, nextIndex, prevIndex]);
-    };
-
-    preloadImages();
-    emblaMainApi.on('select', preloadImages);
-
-    return () => {
-      emblaMainApi.off('select', preloadImages);
-    };
-  }, [emblaMainApi, images.length]);
+  };
 
   const handleAddToCart = () => {
     if (products.some(item => item.id === productInfo.id)) {
@@ -144,81 +87,76 @@ export default function ProductDisone() {
       description: "محصول با موفقیت اضافه شد",
     });
   };
-  const isImageLoaded = (index: number) => loadedImages.includes(index);
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="bg-white rounded-xl shadow-lg p-6 grid grid-cols-1 md:grid-cols-2 gap-8" dir="rtl">
         {/* Image Gallery Section */}
         <div className="space-y-4">
-          {/* Main Carousel */}
-          <div className="relative rounded-lg overflow-hidden bg-gray-100">
-            <div ref={emblaMainRef} className="overflow-hidden">
-              <div className="flex">
-                {images.length > 0 ? (
-                  images.map((url, index) => (
-                    <div key={`main-${index}`} className="flex-[0_0_100%] min-w-0 relative aspect-square">
-                      {isImageLoaded(index) && (
-                        <Image
-                          src={url}
-                          fill
-                          priority={index === 0}
-                          alt={`تصویر ${index + 1} محصول`}
-                          className="object-contain"
-                          sizes="(max-width: 768px) 100vw, 50vw"
-                        />
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <div className="flex-[0_0_100%] min-w-0 relative aspect-square flex items-center justify-center">
-                    <FaImage className="w-24 h-24 text-gray-400" />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Only show navigation buttons if there are multiple images */}
-            {images.length > 1 && (
+          {/* Main Image */}
+          <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
+            {images.length > 0 ? (
               <>
-                <button
-                  onClick={scrollPrev}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/80 
-                           hover:bg-white shadow-md transition-all duration-200 hover:scale-110"
-                >
-                  <IoIosArrowDropleft className="text-2xl text-gray-800" />
-                </button>
-                <button
-                  onClick={scrollNext}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/80 
-                           hover:bg-white shadow-md transition-all duration-200 hover:scale-110"
-                >
-                  <IoIosArrowDropright className="text-2xl text-gray-800" />
-                </button>
+                {loadedImages.includes(selectedIndex) && (
+                  <Image
+                    src={images[selectedIndex]}
+                    fill
+                    priority={selectedIndex === 0}
+                    alt={`تصویر ${selectedIndex + 1} محصول`}
+                    className="object-contain"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                )}
+                {/* Navigation Arrows */}
+                {images.length > 1 && (
+                  <>
+                    <button
+                      onClick={handlePrev}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/80 
+                               hover:bg-white shadow-md transition-all duration-200 hover:scale-110"
+                    >
+                      <IoIosArrowBack className="text-2xl text-gray-800" />
+                    </button>
+                    <button
+                      onClick={handleNext}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/80 
+                               hover:bg-white shadow-md transition-all duration-200 hover:scale-110"
+                    >
+                      <IoIosArrowForward className="text-2xl text-gray-800" />
+                    </button>
+                  </>
+                )}
               </>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <FaImage className="w-24 h-24 text-gray-400" />
+              </div>
             )}
           </div>
 
-          {/* Only show thumbnails if there are multiple images */}
+          {/* Thumbnails */}
           {images.length > 1 && (
-            <div ref={emblaThumbRef} className="overflow-hidden">
-              <div className="flex gap-2">
-                {images.map((url, index) => (
-                  <button
-                    key={`thumb-${index}`}
-                    onClick={() => onThumbClick(index)}
-                    className={`flex-[0_0_20%] min-w-0 relative aspect-square rounded-lg overflow-hidden transition-all duration-200
-                              ${selectedIndex === index ? 'ring-2 ring-blue-500 opacity-100' : 'opacity-60 hover:opacity-100'}`}
-                  >
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {images.map((url, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleThumbnailClick(index)}
+                  className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden transition-all duration-200
+                            ${selectedIndex === index
+                      ? 'ring-2 ring-blue-500 opacity-100 scale-105'
+                      : 'opacity-60 hover:opacity-100 hover:scale-105'}`}
+                >
+                  {loadedImages.includes(index) && (
                     <Image
                       src={url}
-                      fill
+                      width={80}
+                      height={80}
                       alt={`تصویر کوچک ${index + 1}`}
-                      className="object-cover"
-                      sizes="20vw"
+                      className="w-full h-full object-cover"
                     />
-                  </button>
-                ))}
-              </div>
+                  )}
+                </button>
+              ))}
             </div>
           )}
         </div>
